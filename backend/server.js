@@ -18,7 +18,8 @@ async function connectToDatabase() {
   try {
     client = new MongoClient(uri, {
       tls: true,
-      tlsAllowInvalidCertificates: true, // Only if you are facing certificate validation issues
+      tlsAllowInvalidCertificates: false, // Ensure SSL certificates are valid
+      tlsAllowInvalidHostnames: false // Ensure hostnames match the certificates
     });
     await client.connect();
     console.log('Connected to MongoDB');
