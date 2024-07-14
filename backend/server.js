@@ -17,9 +17,13 @@ app.use(cors());
 async function connectToDatabase() {
   try {
     client = new MongoClient(uri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
       tls: true,
-      tlsAllowInvalidCertificates: false, // Ensure SSL certificates are valid
-      tlsAllowInvalidHostnames: false // Ensure hostnames match the certificates
+      tlsInsecure: false,
+      tlsAllowInvalidCertificates: false,
+      tlsAllowInvalidHostnames: false,
+      serverSelectionTimeoutMS: 5000
     });
     await client.connect();
     console.log('Connected to MongoDB');
