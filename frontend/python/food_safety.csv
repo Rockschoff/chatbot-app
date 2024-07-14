@@ -1,0 +1,6 @@
+Date,Product,Inspection_Type,Inspection_Result,Inspector,Notes
+2024-07-01,Apple,Regular,Pass,John Doe,No issues found.
+2024-07-02,Banana,Follow-up,Pass,Jane Smith,Minor labeling issue corrected.
+2024-07-03,Carrot,Regular,Fail,Emily Johnson,Detected presence of pesticides.
+2024-07-04,Spinach,Regular,Pass,Michael Brown,No issues found.
+2024-07-05,Strawberry,Complaint,Fail,Chris Davis,Signs of spoilage and mold.

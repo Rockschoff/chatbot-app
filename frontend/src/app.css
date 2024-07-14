@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+    font-family: 'pirulen';
+    src: url('/fonts/pirulen.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+.heading-font {
+    font-family: 'pirulen', sans-serif;
+}
+
+.message-font {
+    font-family: 'ariel', sans-serif;
+    /* font-size: small; */
+    word-spacing: 3px;
+    
+}
+
+
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 10vh;
+    padding: 0 16px;
+    box-shadow: 0 4px 2px -2px gray;
+}
+
+.logo {
+    height: 48px;
+}
+
+.center-heading {
+    font-size: 1.25rem;
+    font-weight: bold;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    white-space: nowrap;
+}
+
+.info-icon {
+    color: #1E90FF;
+    font-size: 1.875rem;
+    cursor: pointer;
+    position: relative;
+}
+
+@media (max-width: 768px) {
+    .logo, .info-icon {
+        display: none;
+    }
+    .navbar {
+        justify-content: center;
+    }
+    .center-heading {
+        position: static;
+        transform: none;
+        margin: 0;
+    }
+}
