@@ -30,6 +30,7 @@ async function connectToDatabase() {
 }
 
 app.get('/', (req, res) => {
+  console.log("test call to the root")
   res.send('Hello, world!');
 });
 
