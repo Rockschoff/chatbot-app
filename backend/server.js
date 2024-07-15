@@ -12,7 +12,12 @@ const uri = process.env.MONGODB_URI;
 let client;
 
 app.use(bodyParser.json());
-app.use(cors());
+const corsOptions = {
+  origin: 'http://18.191.242.226',
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
 
 async function connectToDatabase() {
   try {
