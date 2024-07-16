@@ -13,7 +13,7 @@ let client;
 
 app.use(bodyParser.json());
 const corsOptions = {
-  origin: 'http://18.191.242.226',
+  origin: ['http://18.191.242.226'],
   optionsSuccessStatus: 200
 };
 
@@ -23,13 +23,14 @@ async function connectToDatabase() {
   try {
     client = new MongoClient(uri, {
       tls: true,
-      tlsAllowInvalidCertificates: false, // Ensure SSL certificates are valid
-      tlsAllowInvalidHostnames: false // Ensure hostnames match the certificates
+      tlsAllowInvalidCertificates: true, // Ensure SSL certificates are valid
+      tlsAllowInvalidHostnames: true // Ensure hostnames match the certificates
     });
     await client.connect();
     console.log('Connected to MongoDB');
   } catch (error) {
     console.error('Failed to connect to MongoDB', error);
+    
     process.exit(1);
   }
 }

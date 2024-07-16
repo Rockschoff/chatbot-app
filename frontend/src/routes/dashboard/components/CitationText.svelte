@@ -10,12 +10,13 @@
 	export let file_id: string;
 	let citationText: string | undefined = 'Loading ...';
 
-	onMount(() => {
-		if (!file_id) {
-			citationText = 'Invalid File ID :' + file_id;
+	onMount(async () => {
+		try {
+			const data: OpenAI.Files.FileObject = await openai.files.retrieve(file_id);
+			citationText = data.filename;
+		} catch (err) {
+			console.log('Could not load file name');
 		}
-		const file = data.find((d) => d.file_id === file_id);
-		citationText = file?.file_name;
 	});
 </script>
 
