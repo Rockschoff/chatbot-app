@@ -21,11 +21,12 @@ app.use(cors(corsOptions));
 
 async function connectToDatabase() {
   try {
-    client = new MongoClient(uri, {
-      tls: true,
-      tlsAllowInvalidCertificates: true, // Ensure SSL certificates are valid
-      tlsAllowInvalidHostnames: true // Ensure hostnames match the certificates
-    });
+    // client = new MongoClient(uri, {
+    //   tls: true,
+    //   tlsAllowInvalidCertificates: true, // Ensure SSL certificates are valid
+    //   tlsAllowInvalidHostnames: true // Ensure hostnames match the certificates
+    // });
+    client = new MongoClient(uri)
     await client.connect();
     console.log('Connected to MongoDB');
   } catch (error) {
