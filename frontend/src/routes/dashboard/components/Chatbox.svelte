@@ -191,7 +191,8 @@
 				thread_id: threadId,
 				message_content: messageContentList[messageContentList.length - 1]
 			});
-			messageInput = ''; // Clear input after sending
+			messageInput = '';
+			file_text = ''; // Clear input after sending
 		}
 	}
 
