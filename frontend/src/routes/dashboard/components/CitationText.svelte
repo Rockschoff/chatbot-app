@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import OpenAI from 'openai';
-	import { data } from '../../../lib/data';
 
 	const openai = new OpenAI({
 		apiKey: import.meta.env.VITE_OPENAI_APIKEY,
