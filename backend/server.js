@@ -132,6 +132,30 @@ app.post('/load-messages', async (req, res) => {
   }
 });
 
+app.post('/get-user', async (req, res) => {
+  console.log("get-user")
+  const { user_id, user_name } = req.body;
+
+  if (!user_id || !user_name) {
+    return res.status(400).send('user_id and user_name are required');
+  }
+
+  try {
+    let user = await mongodbDAO.getUserEntry(user_id);
+
+    if (!user) {
+      await mongodbDAO.createUserEntry(user_id, user_name);
+      user = await mongodbDAO.getUserEntry(user_id);
+    }
+
+    
+    res.status(200).json(user);
+  } catch (error) {
+    console.error('Error fetching or creating user:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 app.listen(port, async () => {
   console.log(`Server running at http://localhost:${port}`);
   try {

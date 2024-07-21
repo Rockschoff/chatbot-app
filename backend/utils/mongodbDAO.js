@@ -95,10 +95,51 @@ const mongodbDAO = {
     const collection = await getCollection('user_threads', 'messages');
     const userThread = await collection.findOne({ user_id, thread_id });
     return userThread ? userThread.messages : null;
+  },
+
+  async createUserEntry(user_id, user_name) {
+    const collection = await getCollection('user_threads', 'users');
+    const defaultDate = new Date('2024-01-01T00:00:00Z');
+    const user = {
+      user_id,
+      user_name,
+      isPremium: false,
+      premium_start_date: defaultDate,
+      premium_end_date: defaultDate
+    };
+    await collection.insertOne(user);
+  },
+
+  async getUserEntry(user_id) {
+    const collection = await getCollection('user_threads', 'users');
+    return collection.findOne({ user_id });
+  },
+
+  async updatesUserEntry(user_id, user_name = null, isPremium = null, premium_start_date = null, premium_end_date = null) {
+    const collection = await getCollection('user_threads', 'users');
+    const updates = {};
+
+    if (user_name !== null) {
+      updates.user_name = user_name;
+    }
+    if (isPremium !== null) {
+      updates.isPremium = isPremium;
+    }
+    if (premium_start_date !== null) {
+      updates.premium_start_date = premium_start_date;
+    }
+    if (premium_end_date !== null) {
+      updates.premium_end_date = premium_end_date;
+    }
+
+    return collection.updateOne(
+      { user_id },
+      { $set: updates }
+    );
   }
 };
 
 module.exports = {
-    ...mongodbDAO,
-    connectToDatabase
-  };
+  ...mongodbDAO,
+  connectToDatabase
+};

@@ -6,13 +6,14 @@
 
 	export let threads: { thread_id: string; thread_name: string }[];
 	export let user_id: string | null;
+	export let user_entry: any;
 
 	const dispatch = createEventDispatcher();
 
 	let editableName: string = $authStore?.currentUser?.displayName;
 	let isEditing = false;
 
-	let chatHistory: string[] = ['Locked ...', 'Locked ...', 'Locked ...'];
+	let lockedHistory: string[] = ['Locked ...', 'Locked ...', 'Locked ...'];
 	async function logout() {
 		await authHandlers.logout();
 	}
@@ -105,26 +106,44 @@
 	<div class="chat-history flex-grow flex flex-col w-full bg-gray-100 p-5 overflow-y-auto">
 		<p class="font-bold hover-underline text-xl text-gray-800 mb-2">Chat History</p>
 		<span class="text-xs text-gray-600 mb-4">feature available in Basic +</span>
-		{#each threads.slice().reverse() as thread, index}
-			<div
-				class="w-full flex items-center p-2 pl-5 bg-white mb-2 rounded-md shadow hover:bg-gray-200 cursor-pointer transition duration-200"
-			>
-				<p
-					class="text-gray-600 hover-underline flex-grow"
-					on:click={() => {
-						loadMessages(thread.thread_id, thread.thread_name);
-					}}
+		{#if true}
+			{#each threads.slice().reverse() as thread, index}
+				<div
+					class="w-full flex items-center p-2 pl-5 bg-white mb-2 rounded-md shadow hover:bg-gray-200 cursor-pointer transition duration-200"
 				>
-					{index + 1}. {thread.thread_name}
-				</p>
-				<button
-					class="text-red-600 hover:text-red-800 transition duration-200"
-					on:click={() => deleteThread(thread.thread_id, thread.thread_name)}
+					<p
+						class="text-gray-600 hover-underline flex-grow"
+						on:click={() => {
+							loadMessages(thread.thread_id, thread.thread_name);
+						}}
+					>
+						{index + 1}. {thread.thread_name}
+					</p>
+					<button
+						class="text-red-600 hover:text-red-800 transition duration-200"
+						on:click={() => deleteThread(thread.thread_id, thread.thread_name)}
+					>
+						<FontAwesomeIcon icon={faTimes} />
+					</button>
+				</div>
+			{/each}
+		{:else}
+			{#each lockedHistory as thread, index}
+				<div
+					class="w-full flex items-center p-2 pl-5 bg-white mb-2 rounded-md shadow hover:bg-gray-200 cursor-pointer transition duration-200"
 				>
-					<FontAwesomeIcon icon={faTimes} />
-				</button>
-			</div>
-		{/each}
+					<p class="text-gray-600 hover-underline flex-grow">
+						{index + 1}. {thread}
+					</p>
+					<!-- <button
+						class="text-red-600 hover:text-red-800 transition duration-200"
+						on:click={() => deleteThread(thread.thread_id, thread.thread_name)}
+					>
+						<FontAwesomeIcon icon={faTimes} />
+					</button> -->
+				</div>
+			{/each}
+		{/if}
 	</div>
 	<button
 		class="w-full p-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 rounded-md transition duration-200 ease-in-out text-center mb-4"

@@ -6,6 +6,8 @@
 	import { auth } from '../../lib/firebase/firebase.client';
 
 	let user_id: string;
+	let user_name: string | null;
+	let user_entry: any;
 	let threads: { thread_id: string; thread_name: string }[] = [];
 
 	interface citation {
@@ -52,6 +54,7 @@
 				unsubscribe = auth.onAuthStateChanged((user) => {
 					if (user) {
 						user_id = user.uid;
+						user_name = user.displayName;
 						console.log('user has loaded with id : ', user.uid);
 						loadThreads();
 					} else {
@@ -63,7 +66,28 @@
 			}
 		};
 
-		setup();
+		const load_user_entry = async () => {
+			try {
+				const response = await fetch(`${backendUrl}/get-user`, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({ user_id: user_id, user_name: user_name })
+				});
+
+				if (!response.ok) {
+					throw new Error('Failed to fetch threads');
+				}
+
+				user_entry = await response.json();
+				console.log(user_entry);
+			} catch (e) {
+				console.error('Error getting user entry', e);
+			}
+		};
+
+		setup().then(load_user_entry);
 
 		return () => {
 			if (unsubscribe) {
@@ -228,7 +252,7 @@
 </script>
 
 <div class="main-container bg-gray-200">
-	<div class="sidebar"><Sidebar on:newChat={handleNewChat} {threads} {user_id} /></div>
+	<div class="sidebar"><Sidebar on:newChat={handleNewChat} {threads} {user_id} {user_entry} /></div>
 	<div class="chat-window bg-gray-200 shadow-md">
 		<Chatbox on:newMessage={handleNewMessage} {threadId} {user_id} {messageContentList} />
 	</div>
