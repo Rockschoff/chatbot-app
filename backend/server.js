@@ -3,10 +3,17 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 require('dotenv').config();
 const { connectToDatabase, ...mongodbDAO } = require('./utils/mongodbDAO');
+const {OpenAI} = require('openai')
 
 const app = express();
 const port = process.env.PORT || 3000;
+const openai_api_key = process.env.OPENAI_APIKEY
+const openai_assistant_id = process.env.ASSISTANTID
+const openai_vectorstore_id = process.env.VECTOR_STORE
 
+const openai =  new OpenAI({
+  api_key : openai_api_key
+})
 app.use(bodyParser.json());
 
 const corsOptions = {
@@ -155,6 +162,11 @@ app.post('/get-user', async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 });
+
+app.post("/get-repsonse" , async (res , req)=>{
+  console.log("get-repsonse")
+
+})
 
 app.listen(port, async () => {
   console.log(`Server running at http://localhost:${port}`);
