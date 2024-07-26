@@ -3,18 +3,197 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 require('dotenv').config();
 const { connectToDatabase, ...mongodbDAO } = require('./utils/mongodbDAO');
+const multer = require('multer');
+const pdfParse = require('pdf-parse');
+const mammoth = require('mammoth');
+const XLSX = require('xlsx');
+const csv = require('csv-parser');
+const { OpenAI } = require('openai');
+const fs = require('fs').promises;
+const path = require('path');
+const { promisify } = require('util');
+const readdirAsync = promisify(fs.readdir);
+const statAsync = promisify(fs.stat);
+const crypto = require('crypto')
+const {VectorStore} = require("./AIModule/VectorStore.js")
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
-
+const openai = new OpenAI({ apiKey: process.env.OPENAI_APIKEY });
 const corsOptions = {
-  origin: ['http://18.191.242.226', 'http://localhost:5173' , 'https://inq-center.innovaqual.com'],
+  origin: ['http://18.191.242.226', 'http://localhost:5173' , 'https://inq-center.innovaqual.com', 'http://localhost:3001' ],
   optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
+const upload = multer({ dest: 'uploads/' });
+const uploadVectorFile = multer({ dest: 'VectorFile/' });
+
+async function deleteFile(filePath) {
+  try {
+    await fs.unlink(filePath);
+    console.log(`Successfully deleted file: ${filePath}`);
+  } catch (error) {
+    console.error(`Error deleting file ${filePath}:`, error);
+  }
+}
+
+async function cleanupFiles(files) {
+  for (const file of files) {
+    await deleteFile(file.path);
+  }
+}
+
+// Helper function to read file contents
+async function readFileContent(file) {
+  const extension = file.originalname.split('.').pop().toLowerCase();
+  switch (extension) {
+    case 'pdf':
+      const pdfData = await pdfParse(file.buffer);
+      return pdfData.text;
+    case 'docx':
+      const result = await mammoth.extractRawText({ path: file.path });
+      return result.value;
+    case 'ppt':
+    case 'pptx':
+      // Implement PPT reading logic (requires additional library)
+      return 'PPT content extraction not implemented';
+    case 'csv':
+      return new Promise((resolve, reject) => {
+        let content = '';
+        fs.createReadStream(file.path)
+          .pipe(csv())
+          .on('data', (row) => {
+            content += JSON.stringify(row) + '\n';
+          })
+          .on('end', () => {
+            resolve(content);
+          })
+          .on('error', reject);
+      });
+    case 'xlsx':
+      const workbook = XLSX.readFile(file.path);
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      return XLSX.utils.sheet_to_csv(sheet);
+    default:
+      return 'Unsupported file type';
+  }
+}
+
+
+app.use(async (error, req, res, next) => {
+  if (req.files) {
+    await cleanupFiles(req.files);
+  }
+  console.error(error);
+  res.status(500).json({ error: 'Internal server error' });
+});
+
+// Main API endpoint
+app.post('/get-response', upload.array('attachments'), async (req, res) => {
+  try {
+
+    console.log(req.body)
+    const messageContent = JSON.parse(req.body.messageContent);
+    const threadId = req.body.threadId
+    const threadName = req.body.threadName
+    
+    
+    
+    const files = req.files;
+
+    // Read content from attachments
+    const attachmentTexts = await Promise.all(files.map(readFileContent));
+
+    // Cleanup files after reading their content
+    await cleanupFiles(files);
+
+    // Add user message to DB
+    await mongodbDAO.addMessageToDB(messageContent.userId, threadId, threadName, messageContent);
+    
+    // Get last 10 messages from the thread
+    const thread = await mongodbDAO.getThread(messageContent.userId , threadId);
+
+    const lastMessages = thread ? thread.messages.slice(-10) : [];
+    // Prepare messages for OpenAI API
+    const attachmentContent = attachmentTexts.join('\n');
+    const userMessageContent = `${messageContent.senderName}: ${messageContent.messageText}` + (attachmentContent ? `\n\nAttachment contents:\n${attachmentContent}` : '');
+    
+    const messages = [
+      { role: 'system', content: 'You are a helpful assistant.' },
+      ...lastMessages.map(msg => ({ role: 'user', content: msg.messageText })),
+      { role: 'user', content: userMessageContent }
+    ];
+
+    // Call OpenAI API
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: messages
+    });
+
+    // Create new MessageContent object
+    const aiResponse = {
+      profilePicUrl:'',
+      senderName: 'IN-Q Center',
+      userId: 'ai-assistant',
+      messageTime: new Date().toISOString(),
+      messageText: completion.choices[0].message.content,
+      attachments: [],
+      citationList: []
+    };
+
+    // Add AI response to DB
+    await mongodbDAO.addMessageToDB(messageContent.userId, threadId, threadName,  aiResponse);
+
+    // Send response
+    res.json({ messageContent: aiResponse, threadId });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+async function periodicCleanup() {
+  const uploadsDir = path.join(__dirname, 'uploads');
+  const files = await readdirAsync(uploadsDir);
+
+  for (const file of files) {
+    const filePath = path.join(uploadsDir, file);
+    const stats = await statAsync(filePath);
+    const now = new Date().getTime();
+    const endTime = new Date(stats.ctime).getTime() + 24 * 60 * 60 * 1000; // 24 hours
+
+    if (now > endTime) {
+      await deleteFile(filePath);
+    }
+  }
+}
+
+setInterval(periodicCleanup, 60 * 60 * 1000);
+
+app.post('/upload-vector-file', uploadVectorFile.single('file'), async (req, res) => {
+  try {
+    console.log("upload-vector-file")
+    const fileId = await VectorStore.uploadFile(req.file);
+    res.json({ success: true, fileId });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: 'File upload failed' });
+  }
+});
+
+app.post('/delete-vector-file', async (req, res) => {
+  try {
+    console.log("delete-vector-file" , req.body)
+    const message = await VectorStore.deleteVectorStoreFile(req.body.fileId);
+    res.json({ success: true, message });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: 'File delete failed' });
+  }
+});
 
 app.get('/', (req, res) => {
   console.log("test call to the root");
@@ -116,6 +295,7 @@ app.post('/load-messages', async (req, res) => {
   const { user_id, thread_id } = req.body;
 
   if (!user_id || !thread_id) {
+    console.log("not enough params" , req.body)
     return res.status(400).send('Missing required fields');
   }
 
@@ -154,6 +334,11 @@ app.post('/get-user', async (req, res) => {
     console.error('Error fetching or creating user:', error);
     res.status(500).send('Internal Server Error');
   }
+});
+
+app.get('/get-thread-id', (req, res) => {
+  const hash = crypto.randomBytes(32).toString('hex');
+  res.json({ threadId: hash });
 });
 
 app.listen(port, async () => {

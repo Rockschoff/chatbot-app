@@ -49,25 +49,42 @@ const mongodbDAO = {
   },
 
   async getThreads(user_id) {
-    const collection = await getCollection('user_threads', 'threads');
-    const user = await collection.findOne({ user_id });
-    return user ? user.threads : null;
+    try {
+      const collection = await getCollection('user_threads', 'messages');
+  
+      // Find all threads for the given user_id
+      const threads = await collection.find({ user_id }).toArray();
+  
+      if (threads.length === 0) {
+        return null;
+      }
+  
+      // Map the threads to only return thread_id and thread_name
+      return threads.map(thread => ({
+        threadId: thread.thread_id,
+        threadName: thread.thread_name
+      }));
+    } catch (error) {
+      console.error('Error fetching threads:', error);
+      return null;
+    }
   },
 
   async deleteThread(user_id, thread_id) {
-    const threadsCollection = await getCollection('user_threads', 'threads');
-    const messagesCollection = await getCollection('user_threads', 'messages');
-
-    const user = await threadsCollection.findOne({ user_id });
-
-    if (user) {
-      await threadsCollection.updateOne(
-        { user_id },
-        { $pull: { threads: { thread_id } } }
-      );
+    try {
+      const messagesCollection = await getCollection('user_threads', 'messages');
+  
+      // Check if the document exists
+      const existingThread = await messagesCollection.findOne({ user_id, thread_id });
+      if (!existingThread) {
+        return false;
+      }
+  
+      // If exists, proceed to delete
       await messagesCollection.deleteMany({ user_id, thread_id });
       return true;
-    } else {
+    } catch (error) {
+      console.error('Error deleting thread:', error);
       return false;
     }
   },
@@ -136,6 +153,48 @@ const mongodbDAO = {
       { user_id },
       { $set: updates }
     );
+  },
+
+  async addMessageToDB(userId, threadId, threadName, messageContent) {
+    try {
+      const collection = await getCollection("user_threads", "messages");
+  
+      // Check if a document with the specified userId and threadId exists
+      const existingThread = await collection.findOne({ user_id: userId, thread_id: threadId });
+  
+      if (existingThread) {
+        // If it exists, add the message to the messages array
+        await collection.updateOne(
+          { user_id: userId, thread_id: threadId },
+          { $push: { messages: messageContent } }
+        );
+      } else {
+        // If it doesn't exist, create a new document with the provided parameters
+        const newThread = {
+          user_id: userId,
+          thread_id: threadId,
+          thread_name: threadName,
+          messages: [messageContent]
+        };
+        await collection.insertOne(newThread);
+      }
+    } catch (error) {
+      console.error('Error adding message to DB:', error);
+      throw error;
+    }
+  },
+
+
+  async getThread(userId , threadId){
+    try {
+      const collection = await getCollection("user_threads" , "messages")
+      const thread = await collection.findOne({user_id : userId , thread_id : threadId});
+      return thread
+
+    }catch(error){
+      console.log("Error fetching threads fromt the DB" , error)
+      throw error;
+    }
   }
 };
 
