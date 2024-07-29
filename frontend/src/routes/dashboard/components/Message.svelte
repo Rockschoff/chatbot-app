@@ -1,14 +1,15 @@
 <script lang="ts">
 	// import data from '../../../lib/data';
-	interface citation {
-		file_id: string;
-		text: string;
-		start_index: number | null;
-		end_index: number | null;
-	}
+
 	import { onMount } from 'svelte';
 	import { marked } from 'marked';
 	import CitationText from './CitationText.svelte';
+
+	interface citation {
+		file_name:string;
+		chunk_content:string;
+		page_number:number;
+	}
 
 	import OpenAI from 'openai';
 
@@ -21,21 +22,25 @@
 	export let senderName;
 	export let messageTime;
 	export let messageText;
-	export let citationList: citation[] = [];
+	export let citationList : citation[];
+	export let attachments;
+	export let userId;
 
-	async function getFile(file_id: string) {
-		if (!file_id) {
-			console.log('file not found');
-		}
-		console.log('calling the api');
-		const file = await openai.files.retrieve(file_id);
-		console.log('got the results');
-		console.log(file);
-	}
+	// async function getFile(file_id: string) {
+	// 	if (!file_id) {
+	// 		console.log('file not found');
+	// 	}
+	// 	console.log('calling the api');
+	// 	const file = await openai.files.retrieve(file_id);
+	// 	console.log('got the results');
+	// 	console.log(file);
+	// }
 
 	marked.setOptions({
-		breaks: true
-	});
+        breaks: true,
+        gfm: true,
+      // Allow raw HTML to be included in the output
+    });
 	// Reactive statement to handle no profile picture
 	$: imageUrl = profilePicUrl || 'default-image'; // Use 'default-image' or leave blank
 	$: hasImage = Boolean(profilePicUrl);
@@ -68,17 +73,8 @@
 				<h5 class="text-xs font-semibold text-gray-700">Citations:</h5>
 				{#each citationList as citation, index}
 					<p class="citation text-xs my-1">
-						<a
-							href={'/dashboard/' + citation.file_id}
-							target="_blank"
-							class="text-blue-500 hover:text-blue-700 hover:underline"
-							on:click={() => {
-								console.log('clicked');
-								getFile(citation.file_id);
-							}}
-						>
-							{index + 1}.) <CitationText file_id={citation.file_id} /> {citation.text}</a
-						>
+						
+							{index + 1}.) <CitationText file_name={citation.file_name} chunk_content={citation.chunk_content} page_number={citation.page_number} />
 					</p>
 				{/each}
 			</div>

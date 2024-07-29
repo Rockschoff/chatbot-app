@@ -1,14 +1,14 @@
 <script lang="ts">
 	import Sidebar from './components/Sidebar.svelte';
 	import Chatbox from './components/Chatbox.svelte';
-	import OpenAI from 'openai';
 	import { onMount } from 'svelte';
 	import { auth } from '../../lib/firebase/firebase.client';
 
 	let user_id: string;
 	let user_name: string | null;
 	let user_entry: any;
-	let threads: { thread_id: string; thread_name: string }[] = [];
+	let threads: { threadId: string; threadName: string }[] = [];
+	const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 	interface citation {
 		file_id: string;
@@ -20,19 +20,16 @@
 	interface MessageContent {
 		profilePicUrl: string;
 		senderName: string;
+		userId: string;
 		messageTime: string;
 		messageText: string;
+		attachments: File[] | string[];
 		citationList: citation[] | null;
 	}
 
 	let messageContentList: MessageContent[] = [];
 
-	const openai = new OpenAI({
-		apiKey: import.meta.env.VITE_OPENAI_APIKEY,
-		dangerouslyAllowBrowser: true
-	});
-
-	let threadId: string | null = null;
+	let threadId: string = '';
 
 	function getCurrentDateTime() {
 		const now = new Date();
@@ -41,15 +38,27 @@
 		return `${date} ${time}`;
 	}
 
-	const backendUrl = import.meta.env.VITE_BACKEND_URL;
+	async function getThreadId() {
+		try {
+			const response = await fetch(`${backendUrl}/get-thread-id`);
+			if (!response.ok) {
+				throw Error('Failed to fetch threadId');
+			}
+			const data = await response.json();
+			return data.threadId;
+		} catch (error) {
+			console.error('Failed to fetch threadId', error);
+		}
+	}
 
 	onMount(() => {
 		let unsubscribe: () => void;
 
 		const setup = async () => {
 			try {
-				const thread = await openai.beta.threads.create();
-				threadId = thread.id;
+				// const thread = await openai.beta.threads.create();
+				// threadId = thread.id;
+				threadId = await getThreadId();
 
 				unsubscribe = auth.onAuthStateChanged((user) => {
 					if (user) {
@@ -66,28 +75,7 @@
 			}
 		};
 
-		const load_user_entry = async () => {
-			try {
-				const response = await fetch(`${backendUrl}/get-user`, {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({ user_id: user_id, user_name: user_name })
-				});
-
-				if (!response.ok) {
-					throw new Error('Failed to fetch threads');
-				}
-
-				user_entry = await response.json();
-				console.log(user_entry);
-			} catch (e) {
-				console.error('Error getting user entry', e);
-			}
-		};
-
-		setup().then(load_user_entry);
+		setup();
 
 		return () => {
 			if (unsubscribe) {
@@ -113,140 +101,47 @@
 
 			const data = await response.json();
 			threads = data.length ? data : [];
+			console.log(data);
 		} catch (error) {
 			console.error('Error fetching threads:', error);
-			threads = [{ thread_id: '0x', thread_name: 'Unavailable' }];
+			threads = [{ threadId: '0x', threadName: 'Unavailable' }];
 		}
 	}
 
 	async function handleNewChat(event: CustomEvent) {
-		console.log('handle new chat', event.detail.retrieval);
 		if (!event.detail.retrieval) {
 			try {
-				const thread = await openai.beta.threads.create();
-				threadId = thread.id;
+				threadId = await getThreadId();
 				messageContentList = [];
 			} catch (error) {
 				console.error('Error creating new chat:', error);
 			}
 		} else {
-			console.log('Retrieving and recreating chat', event.detail);
 			try {
-				// Load messages for the retrieved thread
 				const loadResponse = await fetch(`${backendUrl}/load-messages`, {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json'
 					},
-					body: JSON.stringify({ user_id: event.detail.user_id, thread_id: event.detail.thread_id })
+					body: JSON.stringify({ user_id: event.detail.user_id, thread_id: event.detail.threadId })
 				});
-
 				if (!loadResponse.ok) {
 					throw new Error('Failed to load messages');
 				}
 
 				const messages = await loadResponse.json();
-				messageContentList = messages;
-
-				// Delete the old thread
-				const deleteResponse = await fetch(`${backendUrl}/delete-thread`, {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({
-						user_id: event.detail.user_id,
-						thread_id: event.detail.thread_id,
-						thread_name: event.detail.thread_name
-					})
-				});
-
-				if (!deleteResponse.ok) {
-					throw new Error('Failed to delete old thread');
-				}
-
-				console.log('Old thread deleted successfully');
-
-				// Create a new thread with OpenAI
-				const newThread = await openai.beta.threads.create();
-				threadId = newThread.id;
-
-				// Add the new thread with the old name
-				await addThread(threadId, event.detail.thread_name);
-
-				// Reload threads to reflect changes
-				await loadThreads();
-
-				console.log('New thread created and added successfully:', threadId);
-
-				// Add messages to the new thread
-				for (const message of messageContentList) {
-					await handleNewMessage({
-						detail: {
-							user_id: event.detail.user_id,
-							thread_id: threadId,
-							message_content: message,
-							num_messages: messageContentList.length
-						}
-					} as CustomEvent);
-				}
+				messageContentList = [...messages];
+				threadId = event.detail.threadId;
+				console.log(messageContentList);
 			} catch (error) {
-				console.error('Error retrieving and recreating chat:', error);
+				throw console.error('Unable to load chat', error);
 			}
-		}
-	}
-
-	async function addThread(thread_id: string | null, thread_name: string) {
-		try {
-			const response = await fetch(`${backendUrl}/add-thread`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({ user_id, thread_id, thread_name })
-			});
-
-			if (!response.ok) {
-				throw new Error('Failed to add thread');
-			}
-
-			console.log('Thread added successfully');
-		} catch (error) {
-			console.error('Error adding thread:', error);
 		}
 	}
 
 	async function handleNewMessage(event: CustomEvent) {
-		if (event.detail.num_messages == 1) {
-			await addThread(
-				threadId,
-				event.detail.thread_name ? event.detail.thread_name : getCurrentDateTime()
-			);
-			await loadThreads();
-			console.log('New thread was added');
-		}
-
-		try {
-			const response = await fetch(`${backendUrl}/add-message`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					user_id: event.detail.user_id,
-					thread_id: event.detail.thread_id,
-					messageContent: event.detail.message_content
-				})
-			});
-
-			if (!response.ok) {
-				console.log(response);
-				throw new Error('Failed to add message');
-			}
-
-			console.log('Message added successfully');
-		} catch (error) {
-			console.error('Error adding message:', error);
+		if (event.detail.numMessages) {
+			loadThreads();
 		}
 	}
 </script>

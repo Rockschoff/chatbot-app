@@ -16,6 +16,13 @@ const readdirAsync = promisify(fs.readdir);
 const statAsync = promisify(fs.stat);
 const crypto = require('crypto')
 const {VectorStore} = require("./AIModule/VectorStore.js")
+const {OpenAIModel} = require("./AIModule/OpenAIModel")
+const {FirstWorkFlow , SecondWorkFlow, ThirdWorkFlow} = require("./AIModule/FirstWorkFlow")
+
+const openaiModel = new OpenAIModel()
+const workflow = new FirstWorkFlow( openaiModel ,  VectorStore)
+const secondWorkflow = new SecondWorkFlow(openaiModel , VectorStore)
+const thirdWorkflow = new ThirdWorkFlow(openaiModel , VectorStore , process.env.TAVILY_API_KEY)
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -127,11 +134,8 @@ app.post('/get-response', upload.array('attachments'), async (req, res) => {
       { role: 'user', content: userMessageContent }
     ];
 
-    // Call OpenAI API
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: messages
-    });
+    const workflowResponse = await thirdWorkflow.getResponse(messages)
+    console.log(workflowResponse)
 
     // Create new MessageContent object
     const aiResponse = {
@@ -139,9 +143,9 @@ app.post('/get-response', upload.array('attachments'), async (req, res) => {
       senderName: 'IN-Q Center',
       userId: 'ai-assistant',
       messageTime: new Date().toISOString(),
-      messageText: completion.choices[0].message.content,
+      messageText: workflowResponse.response,//completionContent,//completion.choices[0].message.content,
       attachments: [],
-      citationList: []
+      citationList: workflowResponse.chunk_info?workflowResponse.chunk_info:[]
     };
 
     // Add AI response to DB

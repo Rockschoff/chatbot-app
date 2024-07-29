@@ -4,7 +4,7 @@
 	import { authStore, authHandlers } from '../../../stores/authStore';
 	import { createEventDispatcher, onMount } from 'svelte';
 
-	export let threads: { thread_id: string; thread_name: string }[];
+	export let threads: { threadId: string; threadName: string }[];
 	export let user_id: string | null;
 	export let user_entry: any;
 
@@ -33,8 +33,8 @@
 		dispatch('newChat', { retrieval: false });
 	}
 
-	function loadMessages(thread_id: string, thread_name: string) {
-		dispatch('newChat', { thread_id, user_id, thread_name, retrieval: true });
+	function loadMessages(threadId: string, threadName: string) {
+		dispatch('newChat', { threadId, user_id, threadName, retrieval: true });
 	}
 
 	// Function to save the new name
@@ -59,14 +59,14 @@
 	const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 	// Function to delete a thread
-	async function deleteThread(thread_id: string, thread_name: string) {
+	async function deleteThread(threadId: string, threadName: string) {
 		try {
 			const response = await fetch(`${backendUrl}/delete-thread`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({ user_id, thread_id, thread_name })
+				body: JSON.stringify({ user_id: user_id, thread_id: threadId, threadName })
 			});
 
 			if (!response.ok) {
@@ -74,7 +74,7 @@
 			}
 
 			// Remove the deleted thread from the threads array
-			threads = threads.filter((thread) => thread.thread_id !== thread_id);
+			threads = threads.filter((thread) => thread.threadId !== threadId);
 		} catch (error) {
 			console.error('Error deleting thread:', error);
 		}
@@ -114,14 +114,14 @@
 					<p
 						class="text-gray-600 hover-underline flex-grow"
 						on:click={() => {
-							loadMessages(thread.thread_id, thread.thread_name);
+							loadMessages(thread.threadId, thread.threadName);
 						}}
 					>
-						{index + 1}. {thread.thread_name}
+						{index + 1}. {thread.threadName}
 					</p>
 					<button
 						class="text-red-600 hover:text-red-800 transition duration-200"
-						on:click={() => deleteThread(thread.thread_id, thread.thread_name)}
+						on:click={() => deleteThread(thread.threadId, thread.threadName)}
 					>
 						<FontAwesomeIcon icon={faTimes} />
 					</button>
@@ -137,7 +137,7 @@
 					</p>
 					<!-- <button
 						class="text-red-600 hover:text-red-800 transition duration-200"
-						on:click={() => deleteThread(thread.thread_id, thread.thread_name)}
+						on:click={() => deleteThread(thread.threadId, thread.threadName)}
 					>
 						<FontAwesomeIcon icon={faTimes} />
 					</button> -->

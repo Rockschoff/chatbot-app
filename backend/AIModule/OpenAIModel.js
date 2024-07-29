@@ -1,23 +1,23 @@
 
 const { OpenAI } = require('openai');
 
-export const OpenAIModel = {
-    model_info : {provider : 'openai' , model_name : "gpt-4o" },
-    model : null,
-    async initializeModel(){
+class OpenAIModel  {
+    
+    constructor(){
         try{
-            this.model = await OpenAI({apiKey: process.env.OPENAI_APIKEY});
+            this.model = new OpenAI({apiKey: process.env.OPENAI_APIKEY});
+            this.model_info = {provider : 'openai' , model_name : "gpt-4o" }
         }catch(error){
             console.error("Error Initializing OpenAI Model" , error)
         }
         
-    },
+    }
 
     async getResponse(messages){
         // get text from vector store along with citations
         //append text to text
         try{
-            reponse = await this.model.chat.completions.create({
+            const response = await this.model.chat.completions.create({
                 model : this.model_info.model_name,
                 messages : messages
             })
@@ -31,3 +31,4 @@ export const OpenAIModel = {
     }
 }
 
+module.exports={OpenAIModel}

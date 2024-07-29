@@ -1,29 +1,25 @@
 <script lang="ts">
 	import { onMount, createEventDispatcher } from 'svelte';
 	import Message from './Message.svelte';
-	import OpenAI from 'openai';
-	import * as pdfjsLib from 'pdfjs-dist';
-	import * as XLSX from 'xlsx';
-	import Papa from 'papaparse';
-	import mammoth from 'mammoth';
-	import JSZip from 'jszip';
+
 
 	const dispatch = createEventDispatcher();
 
 	export let user_id: string;
 
 	interface citation {
-		file_id: string;
-		text: string;
-		start_index: number | null;
-		end_index: number | null;
+		file_name:string;
+		chunk_content:string;
+		page_number:number;
 	}
 
 	interface MessageContent {
 		profilePicUrl: string;
 		senderName: string;
+		userId: string;
 		messageTime: string;
 		messageText: string;
+		attachments: File[] | string[];
 		citationList: citation[] | null;
 	}
 
@@ -31,13 +27,9 @@
 	export let messageContentList: MessageContent[];
 	let files: File[] = [];
 	let messageInput = '';
-	export let threadId: string | null;
+	export let threadId: string;
 
-	const openai = new OpenAI({
-		apiKey: import.meta.env.VITE_OPENAI_APIKEY,
-		dangerouslyAllowBrowser: true
-	});
-	async function handleEnterPress(event) {
+	async function handleEnterPress(event: KeyboardEvent) {
 		if (event.key === 'Enter') sendMessage();
 	}
 
@@ -50,196 +42,74 @@
 		});
 	}
 
-	async function handleFileUpload(event) {
-		const newFiles = Array.from(event.target.files);
+	async function handleFileUpload(event: Event) {
+		const input = event.target as HTMLInputElement;
+		if (!input.files) return;
+
+		const newFiles = Array.from(input.files) as File[];
 		files = [...files, ...newFiles];
 	}
 
-	onMount(async () => {
-		// const thread = await openai.beta.threads.create();
-		// threadId = thread.id;
-		pdfjsLib.GlobalWorkerOptions.workerSrc =
-			'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.worker.min.js';
+	onMount(() => {
+		scrollToBottom();
 	});
 
-	async function getFileText(file: File): Promise<string> {
-		if (file.name.endsWith('.pdf')) {
-			return await getPDFText(file);
-		} else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
-			return await getExcelText(file);
-		} else if (file.name.endsWith('.csv')) {
-			return await getCSVText(file);
-		} else if (file.name.endsWith('.docx')) {
-			return await getDocxText(file);
-		} else if (file.name.endsWith('.pptx')) {
-			return await getPptxText(file);
-		} else {
-			throw new Error('Unsupported file type');
-		}
-	}
-
-	async function getPDFText(file: File): Promise<string> {
-		const arrayBuffer = await file.arrayBuffer();
-		const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-
-		let fullText = '';
-		for (let i = 1; i <= pdf.numPages; i++) {
-			const page = await pdf.getPage(i);
-			const textContent = await page.getTextContent();
-			const pageText = textContent.items.map((item: any) => item.str).join(' ');
-			fullText += pageText + '\n\n';
-		}
-
-		return fullText.trim();
-	}
-
-	async function getExcelText(file: File): Promise<string> {
-		const arrayBuffer = await file.arrayBuffer();
-		const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-
-		let fullText = '';
-		workbook.SheetNames.forEach((sheetName) => {
-			const worksheet = workbook.Sheets[sheetName];
-			const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-			const sheetText = data.map((row) => row.join(', ')).join('\n');
-			fullText += `Sheet: ${sheetName}\n${sheetText}\n\n`;
-		});
-
-		return fullText.trim();
-	}
-
-	async function getCSVText(file: File): Promise<string> {
-		return new Promise((resolve, reject) => {
-			Papa.parse(file, {
-				complete: (results) => {
-					const text = results.data.map((row) => row.join(', ')).join('\n');
-					resolve(text);
-				},
-				error: (error) => {
-					reject(error);
-				}
-			});
-		});
-	}
-
-	async function getDocxText(file: File): Promise<string> {
-		const arrayBuffer = await file.arrayBuffer();
-		const result = await mammoth.extractRawText({ arrayBuffer });
-		return result.value;
-	}
-
-	async function getPptxText(file: File): Promise<string> {
-		const arrayBuffer = await file.arrayBuffer();
-		const zip = new JSZip();
-		const zipContent = await zip.loadAsync(arrayBuffer);
-		let content = '';
-		let slideIndex = 1;
-
-		for (const fileName in zipContent.files) {
-			if (fileName.startsWith('ppt/slides/slide')) {
-				const slide = await zipContent.file(fileName)?.async('string');
-				if (slide) {
-					content += `Slide ${slideIndex}:\n`;
-					const textMatches = slide.match(/<a:t>(.+?)<\/a:t>/g);
-					if (textMatches) {
-						textMatches.forEach((match) => {
-							const text = match.replace(/<a:t>|<\/a:t>/g, '');
-							content += `${text}\n`;
-						});
-					}
-					content += '\n';
-					slideIndex++;
-				}
-			}
-		}
-		return content;
-	}
-
 	async function sendMessage() {
-		if (files.length > 0) {
-			file_text = '';
-			for (let file of files) {
-				try {
-					file_text += (await getFileText(file)) + '\n\n';
-				} catch (error) {
-					console.error(`Error processing file ${file.name}:`, error);
-				}
-			}
-			files = []; // Reset the files array after handling
-		}
-		if (messageInput.trim() || file_text) {
-			const newMessage: MessageContent = {
-				profilePicUrl: '',
-				senderName: 'Me',
-				messageTime: new Date().toLocaleTimeString(),
-				messageText: messageInput,
-				citationList: []
-			};
-			messageContentList = [...messageContentList, newMessage];
-			dispatch('newMessage', {
-				num_messages: messageContentList.length,
-				user_id: user_id,
-				thread_id: threadId,
-				thread_name: messageContentList[0].messageText.substring(0, 10) + '...',
-				message_content: newMessage
-			});
-			scrollToBottom();
-			await sendToOpenAI(messageInput);
-			dispatch('newMessage', {
-				num_messages: messageContentList.length,
-				user_id: user_id,
-				thread_id: threadId,
-				message_content: messageContentList[messageContentList.length - 1]
-			});
-			messageInput = '';
-			file_text = ''; // Clear input after sending
-		}
-	}
+		if (messageInput.trim() === '') return;
 
-	async function sendToOpenAI(userInput: string) {
-		if (!threadId) return;
+		const formData = new FormData();
+		files.forEach((file) => formData.append('attachments', file));
 
-		const content = file_text
-			? `Uploaded File Text: ${file_text}\n\nUser Input: ${userInput}`
-			: userInput;
-
-		console.log('content : ', content);
-		await openai.beta.threads.messages.create(threadId, { role: 'user', content });
-
-		const stream = await openai.beta.threads.runs.create(threadId, {
-			assistant_id: import.meta.env.VITE_ASSISTANTID, // vs_D1fKWaJJGI6QKCJRVIx5ekZE
-			stream: true
-		});
-
-		let botMessage: MessageContent = {
-			profilePicUrl: './small_logo.png',
-			senderName: 'In-Q Center',
-			messageTime: new Date().toLocaleTimeString(),
-			messageText: '',
-			citationList: []
+		// Create a new message object
+		const newMessage: MessageContent = {
+			profilePicUrl: '', // Replace with actual path
+			senderName: 'User', // Replace with actual name
+			userId: user_id,
+			messageTime: new Date().toISOString(),
+			messageText: messageInput,
+			attachments: files,
+			citationList: [] // Add citation logic if needed
 		};
-		messageContentList = [...messageContentList, botMessage];
 
-		for await (const event of stream) {
-			if (event.event === 'thread.message.delta') {
-				// const lastMessage = messageContentList[messageContentList.length - 1];
-				messageContentList[messageContentList.length - 1].messageText +=
-					event.data.delta.content[0].text.value;
-				if (event.data.delta.content[0].text.annotations?.length > 0) {
-					event.data.delta.content[0].text.annotations.forEach((ele) => {
-						if (ele?.file_citation) {
-							const ref: citation = {
-								file_id: ele.file_citation.file_id,
-								text: ele.text,
-								start_index: ele.start_index,
-								end_index: ele.end_index
-							};
-							messageContentList[messageContentList.length - 1].citationList?.push(ref);
-						}
-					});
-				}
-				scrollToBottom();
+		formData.append('messageContent', JSON.stringify(newMessage));
+		formData.append('threadId', threadId);
+		formData.append(
+			'threadName',
+			messageContentList.length
+				? messageContentList[0].messageText.substring(0, 10)
+				: newMessage.messageText.substring(0, 10)
+		);
+
+		// Update the message list with the user's message
+		messageContentList = [...messageContentList, newMessage];
+		dispatch('newMessage', { numMessages: messageContentList.length });
+		scrollToBottom();
+
+		// Send the message to the backend
+		try {
+			const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/get-response`, {
+				method: 'POST',
+				body: formData
+			});
+
+			if (!response.ok) {
+				throw new Error('Network response was not ok');
 			}
+
+			const responseData = await response.json();
+			const backendMessage: MessageContent = responseData.messageContent;
+			console.log(backendMessage)
+			backendMessage.profilePicUrl="./small_logo.png"
+			// Update the message list with the backend's response
+			messageContentList = [...messageContentList, backendMessage];
+			dispatch('newMessage', { numMessages: messageContentList.length });
+			scrollToBottom();
+		} catch (error) {
+			console.error('Failed to send message:', error);
+		} finally {
+			// Clear the input and file list
+			messageInput = '';
+			files = [];
 		}
 	}
 

@@ -9,16 +9,16 @@ const openai = new OpenAI({
 export async function load({params}){
     console.log(params)
     let file
-    try{
-        file = await openai.files.retrieve(params.file_id);
-    }catch(e){
-        console.log("Error Getting file from openai" , e)
-    }
+    // try{
+    //     file = await openai.files.retrieve(params.file_id);
+    // }catch(e){
+    //     console.log("Error Getting file from openai" , e)
+    // }
     
-    console.log("found the file" , file)
-    if (!file) throw error(404)
+    // console.log("found the file" , file)
+    // if (!file) throw error(404)
     return {
-        file_name : file.filename,
+        file_name : params.file_id,
         file_id : params.file_id
     }
 }
