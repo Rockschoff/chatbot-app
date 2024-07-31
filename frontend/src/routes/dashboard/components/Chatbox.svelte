@@ -55,63 +55,98 @@
 	});
 
 	async function sendMessage() {
-		if (messageInput.trim() === '') return;
+	if (messageInput.trim() === '') return;
 
-		const formData = new FormData();
-		files.forEach((file) => formData.append('attachments', file));
+	const formData = new FormData();
+	files.forEach((file) => formData.append('attachments', file));
 
-		// Create a new message object
-		const newMessage: MessageContent = {
-			profilePicUrl: '', // Replace with actual path
-			senderName: 'User', // Replace with actual name
-			userId: user_id,
-			messageTime: new Date().toISOString(),
-			messageText: messageInput,
-			attachments: files,
-			citationList: [] // Add citation logic if needed
-		};
+	// Create a new message object
+	const newMessage: MessageContent = {
+		profilePicUrl: '', // Replace with actual path
+		senderName: 'User', // Replace with actual name
+		userId: user_id,
+		messageTime: new Date().toISOString(),
+		messageText: messageInput,
+		attachments: files,
+		citationList: [] // Add citation logic if needed
+	};
 
-		formData.append('messageContent', JSON.stringify(newMessage));
-		formData.append('threadId', threadId);
-		formData.append(
-			'threadName',
-			messageContentList.length
-				? messageContentList[0].messageText.substring(0, 10)
-				: newMessage.messageText.substring(0, 10)
-		);
+	formData.append('messageContent', JSON.stringify(newMessage));
+	formData.append('threadId', threadId);
+	formData.append(
+		'threadName',
+		messageContentList.length
+			? messageContentList[0].messageText.substring(0, 10)
+			: newMessage.messageText.substring(0, 10)
+	);
 
-		// Update the message list with the user's message
-		messageContentList = [...messageContentList, newMessage];
+	// Update the message list with the user's message
+	messageContentList = [...messageContentList, newMessage];
+
+	dispatch('newMessage', { numMessages: messageContentList.length });
+	scrollToBottom();
+
+	// Add a temporary loading message
+	const loadingMessage: MessageContent = {
+		profilePicUrl: "./small_logo.png", // Replace with actual path or a loading spinner
+		senderName: 'System', // Or any indicator for the system message
+		userId: 'system',
+		messageTime: new Date().toISOString(),
+		messageText: 'Getting Response...',
+		attachments: [],
+		citationList: []
+	};
+	messageContentList = [...messageContentList, loadingMessage];
+	
+	scrollToBottom();
+
+	// Send the message to the backend
+	try {
+		const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/get-response`, {
+			method: 'POST',
+			body: formData
+		});
+
+		if (!response.ok) {
+			throw new Error('Network response was not ok');
+		}
+
+		const responseData = await response.json();
+		const backendMessage: MessageContent = responseData.messageContent;
+		backendMessage.profilePicUrl = "./small_logo.png";
+
+		// Remove the temporary loading message
+		messageContentList = messageContentList.filter(msg => msg !== loadingMessage);
+
+		// Update the message list with the backend's response
+		messageContentList = [...messageContentList, backendMessage];
 		dispatch('newMessage', { numMessages: messageContentList.length });
 		scrollToBottom();
+	} catch (error) {
+		console.error('Failed to send message:', error);
 
-		// Send the message to the backend
-		try {
-			const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/get-response`, {
-				method: 'POST',
-				body: formData
-			});
+		// Remove the temporary loading message
+		messageContentList = messageContentList.filter(msg => msg !== loadingMessage);
 
-			if (!response.ok) {
-				throw new Error('Network response was not ok');
-			}
-
-			const responseData = await response.json();
-			const backendMessage: MessageContent = responseData.messageContent;
-			console.log(backendMessage)
-			backendMessage.profilePicUrl="./small_logo.png"
-			// Update the message list with the backend's response
-			messageContentList = [...messageContentList, backendMessage];
-			dispatch('newMessage', { numMessages: messageContentList.length });
-			scrollToBottom();
-		} catch (error) {
-			console.error('Failed to send message:', error);
-		} finally {
-			// Clear the input and file list
-			messageInput = '';
-			files = [];
-		}
+		// Optionally, add an error message
+		const errorMessage: MessageContent = {
+			profilePicUrl: '', // Replace with actual path or a warning icon
+			senderName: 'System',
+			userId: 'system',
+			messageTime: new Date().toISOString(),
+			messageText: 'Failed to send message.',
+			attachments: [],
+			citationList: []
+		};
+		messageContentList = [...messageContentList, errorMessage];
+		dispatch('newMessage', { numMessages: messageContentList.length });
+		scrollToBottom();
+	} finally {
+		// Clear the input and file list
+		messageInput = '';
+		files = [];
 	}
+}
 
 	function removeFile(index: number) {
 		files = files.filter((_, i) => i !== index);
