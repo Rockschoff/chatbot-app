@@ -1,7 +1,7 @@
 <script lang="ts">
 	// import data from '../../../lib/data';
 
-	import { onMount } from 'svelte';
+	import { afterUpdate, onMount } from 'svelte';
 	import { marked } from 'marked';
 	import CitationText from './CitationText.svelte';
 
@@ -46,11 +46,11 @@
 	$: hasImage = Boolean(profilePicUrl);
 
 	// Convert Markdown to HTML
-	$: htmlMessage = marked(messageText || '');
+	$: htmlMessage =marked(messageText || '');
 
 	// Function to modify all links to open in a new tab
 	function setLinksToOpenInNewTab() {
-		const links = document.querySelectorAll('.markdown-content a');
+		const links = document.querySelectorAll('#message-content a');
 		links.forEach(link => {
 			link.setAttribute('target', '_blank');
 			link.setAttribute('rel', 'noopener noreferrer'); // Security best practice
@@ -62,9 +62,9 @@
 		setLinksToOpenInNewTab();
 	});
 
-	$: {
+	afterUpdate(()=>{
 		setLinksToOpenInNewTab();
-	}
+	})
 </script>
 
 <div
@@ -83,7 +83,7 @@
 			<h4 class="font-semibold">{senderName}</h4>
 			<span class="text-xs text-gray-500">{messageTime}</span>
 		</div>
-		<div class="markdown-content message-font break-words overflow-hidden message-content">
+		<div id="message-content" class="markdown-content message-font break-words overflow-hidden message-content">
 			{@html htmlMessage}
 		</div>
 		{#if citationList.length > 0}
