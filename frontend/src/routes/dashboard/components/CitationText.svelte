@@ -22,7 +22,7 @@
 	}
 
 	function visitFile() {
-		window.location.href = `${window.location.pathname}/${file_name}`;
+		window.open(`${window.location.pathname}/${file_name}`, '_blank');
 	}
 </script>
 

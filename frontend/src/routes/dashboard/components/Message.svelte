@@ -47,6 +47,24 @@
 
 	// Convert Markdown to HTML
 	$: htmlMessage = marked(messageText || '');
+
+	// Function to modify all links to open in a new tab
+	function setLinksToOpenInNewTab() {
+		const links = document.querySelectorAll('.markdown-content a');
+		links.forEach(link => {
+			link.setAttribute('target', '_blank');
+			link.setAttribute('rel', 'noopener noreferrer'); // Security best practice
+		});
+	}
+
+	// Apply the function on component mount and whenever htmlMessage changes
+	onMount(() => {
+		setLinksToOpenInNewTab();
+	});
+
+	$: {
+		setLinksToOpenInNewTab();
+	}
 </script>
 
 <div
