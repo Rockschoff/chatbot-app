@@ -23,7 +23,7 @@ class FirstWorkFlow {
 You are an AI assistant that provides information based on the given context. Your responses should be in markdown format and include citations for the information you use.
 
 When you use information from the provided context, add a citation right after the statement. The citation should be a link in the format [file_name](./dashboard/file_name), where file_name is the name of the source file.
-
+Please do not edit the file names in the URLs. If there are spaces in the file names, format them as %20 as usual for a URL.
 At the end of your response, include a "References" section that lists all the citations used, with each citation linking to the corresponding file.
 
 Here's the context information:
@@ -98,6 +98,7 @@ class SecondWorkFlow {
         const promptTemplate = `
 You are an AI assistant that provides information based on the given context. Your responses should be in markdown format and include citations for the information you use.
 When you use information from the provided context, add a citation right after the statement. The citation should be a link in the format [file_name](./dashboard/file_name), where file_name is the name of the source file.
+Please do not edit the file names in the URLs. If there are spaces in the file names, format them as %20 as usual for a URL.
 At the end of your response, include a "References" section that lists all the citations used, with each citation linking to the corresponding file.
 Here's the context information:
 ${context}
@@ -197,7 +198,7 @@ class ThirdWorkFlow {
 You are an AI assistant, in Food Safety and Quality Industry, that provides information based on the given context and web search results (if available). Your responses should be in markdown format and include citations for the information you use.
 
 When you use information from the provided context, add a citation right after the statement. The citation should be a link in the format [file_name](./dashboard/file_name), where file_name is the name of the source file or URL.
-
+Please do not edit the file names in the URLs. If there are spaces in the file names, format them as %20 as usual for a URL.
 At the end of your response, include a "References" section that lists all the citations used, with each citation linking to the corresponding file or URL. Finally always make sure that URL and content that you include in the response does not contain random URLs that are not related to the question
 
 Here's the context information:
@@ -330,7 +331,7 @@ class ThirdWorkFlowNoInternet {
 You are an AI assistant, in Food Safety and Quality Industry, that provides information based on the given context and web search results (if available). Your responses should be in markdown format and include citations for the information you use.
 
 When you use information from the provided context, add a citation right after the statement. The citation should be a link in the format [file_name](./dashboard/file_name), where file_name is the name of the source file or URL.
-
+Please do not edit the file names in the URLs. If there are spaces in the file names, format them as %20 as usual for a URL.
 At the end of your response, include a "References" section that lists all the citations used, with each citation linking to the corresponding file or URL. Finally always make sure that URL and content that you include in the response does not contain random URLs that are not related to the question
 
 Here's the context information:
@@ -454,7 +455,7 @@ class FourthWorkFlow {
 You are an AI assistant in the Food Safety and Quality Industry. Your responses should be in markdown format and include citations for the information you use.
 
 When you use information from the provided context, add a citation right after the statement. The citation should be a link in the format [file_name](./dashboard/file_name), where file_name is the name of the source file.
-
+Please do not edit the file names in the URLs. If there are spaces in the file names, format them as %20 as usual for a URL.
 At the end of your response, include a "References" section that lists all the citations used, with each citation linking to the corresponding file.
 
 Here's the context information:
@@ -576,7 +577,7 @@ class FifthWorkFlow {
 You are an AI assistant in the Food Safety and Quality Industry. Your responses should be in markdown format and include citations for the information you use.
 
 When you use information from the provided context, add a citation right after the statement. The citation should be a link in the format [file_name](./dashboard/file_name), where file_name is the name of the source file.
-
+Please do not edit the file names in the URLs. If there are spaces in the file names, format them as %20 as usual for a URL.
 At the end of your response, include a "References" section that lists all the citations used, with each citation linking to the corresponding file.
 
 Here's the context information:
@@ -738,7 +739,7 @@ class SixthWorkFlow {
 You are an AI assistant in the Food Safety and Quality Industry. Your responses should be in markdown format and include citations for the information you use.
 
 When you use information from the provided context, add a citation right after the statement. The citation should be a link in the format [file_name](./dashboard/file_name) for local files, or [URL](URL) for web sources.
-
+Please do not edit the file names in the URLs. If there are spaces in the file names, format them as %20 as usual for a URL.
 At the end of your response, include a "References" section that lists all the citations used, with each citation linking to the corresponding file or URL.
 
 Here's the context information:
