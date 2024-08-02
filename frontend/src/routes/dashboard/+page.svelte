@@ -24,7 +24,7 @@
 		messageTime: string;
 		messageText: string;
 		attachments: File[] | string[];
-		citationList: citation[] | null;
+		citationList: citation[];
 	}
 
 	let messageContentList: MessageContent[] = [];

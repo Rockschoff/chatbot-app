@@ -21,9 +21,14 @@
 		showModal.set(false);
 	}
 
-	function visitFile() {
-		window.open(`${window.location.pathname}/${file_name}`, '_blank');
-	}
+	function visitFile(file_name:string) {
+    if (file_name.startsWith("https://")) {
+        window.open(file_name, '_blank');
+    } else {
+        window.open(`${window.location.pathname}/${file_name}`, '_blank');
+    }
+}
+
 </script>
 
 <style>

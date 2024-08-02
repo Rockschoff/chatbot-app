@@ -2,6 +2,13 @@
 	import { onMount, createEventDispatcher } from 'svelte';
 	import Message from './Message.svelte';
 
+	function getCurrentDateTime() {
+		const now = new Date();
+		const date = now.toLocaleDateString('en-US');
+		const time = now.toLocaleTimeString('en-US');
+		return `${date} ${time}`;
+	}
+
 
 	const dispatch = createEventDispatcher();
 
@@ -27,7 +34,8 @@
 	export let messageContentList: MessageContent[];
 	let files: File[] = [];
 	let messageInput = '';
-	let selectedModelVersion = 'v1'; // Default to v1
+	let modelOptions : number[] = [3,4,6,8]
+	let selectedModelVersion = `v${modelOptions[0]}`; // Default to v1
 	export let threadId: string;
 
 	async function handleEnterPress(event: KeyboardEvent) {
@@ -77,8 +85,8 @@
 	formData.append(
 		'threadName',
 		messageContentList.length
-			? messageContentList[0].messageText.substring(0, 10)
-			: newMessage.messageText.substring(0, 10)
+			? messageContentList[0].messageText.substring(0, 25) + "..." 
+			: newMessage.messageText.substring(0, 25) + "... " 
 	);
 	formData.append('modelVersion', selectedModelVersion);
 
@@ -191,8 +199,8 @@
 			bind:value={selectedModelVersion}
 			class="bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
 		  >
-			{#each Array(7) as _, i}
-			  <option value="v{i+1}">v{i+1}</option>
+			{#each modelOptions as option, i}
+			  <option value="v{option}">v{option}</option>
 			{/each}
 		  </select>
 		  <button

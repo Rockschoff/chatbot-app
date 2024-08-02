@@ -31,6 +31,7 @@ const models = {
   "v5" : new WF.FourthWorkFlow(openaiModel ,  VectorStore),
   "v6" : new WF.FirstWorkFlow(openaiModel ,  VectorStore),
   "v7" : new  WF.SixthWorkFlow(openaiModel , VectorStore , process.env.TAVILY_API_KEY),
+  "v8" : new WF.SeventhWorkFlow(openaiModel , VectorStore , process.env.TAVILY_API_KEY)
 }
 
 const app = express();
