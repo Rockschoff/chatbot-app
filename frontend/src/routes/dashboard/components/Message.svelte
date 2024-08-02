@@ -18,13 +18,13 @@
 		dangerouslyAllowBrowser: true
 	});
 
-	export let profilePicUrl;
-	export let senderName;
-	export let messageTime;
-	export let messageText;
+	export let profilePicUrl : string;
+	export let senderName : string;
+	export let messageTime : string;
+	export let messageText : string;
 	export let citationList : citation[];
-	export let attachments;
-	export let userId;
+	export let attachments : File[]|string[];
+	export let userId : string;
 
 	// async function getFile(file_id: string) {
 	// 	if (!file_id) {

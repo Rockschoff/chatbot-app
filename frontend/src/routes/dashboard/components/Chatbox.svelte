@@ -20,13 +20,14 @@
 		messageTime: string;
 		messageText: string;
 		attachments: File[] | string[];
-		citationList: citation[] | null;
+		citationList: citation[];
 	}
 
 	let file_text: string = '';
 	export let messageContentList: MessageContent[];
 	let files: File[] = [];
 	let messageInput = '';
+	let selectedModelVersion = 'v1'; // Default to v1
 	export let threadId: string;
 
 	async function handleEnterPress(event: KeyboardEvent) {
@@ -79,6 +80,7 @@
 			? messageContentList[0].messageText.substring(0, 10)
 			: newMessage.messageText.substring(0, 10)
 	);
+	formData.append('modelVersion', selectedModelVersion);
 
 	// Update the message list with the user's message
 	messageContentList = [...messageContentList, newMessage];
@@ -162,42 +164,50 @@
 
 	<div class="input-area bg-gray-200 w-full">
 		<div class="flex flex-row justify-center items-center space-x-2 px-4 py-2">
-			<input
-				placeholder="Type your message here"
-				class="form-input flex-grow py-2 px-4 rounded-lg"
-				bind:value={messageInput}
-				on:keypress={handleEnterPress}
-			/>
-			{#if files.length > 0}
-				<div class="file-info bg-gray-100 p-2 rounded-lg h-10 overflow-y-auto">
-					{#each files as file, index}
-						<div class="flex items-center justify-between">
-							<span>{file.name}</span>
-							<button on:click={() => removeFile(index)} class="text-red-500 ml-2">×</button>
-						</div>
-					{/each}
+		  <input
+			placeholder="Type your message here"
+			class="form-input flex-grow py-2 px-4 rounded-lg"
+			bind:value={messageInput}
+			on:keypress={handleEnterPress}
+		  />
+		  {#if files.length > 0}
+			<div class="file-info bg-gray-100 p-2 rounded-lg h-10 overflow-y-auto">
+			  {#each files as file, index}
+				<div class="flex items-center justify-between">
+				  <span>{file.name}</span>
+				  <button on:click={() => removeFile(index)} class="text-red-500 ml-2">×</button>
 				</div>
-			{/if}
-			<label
-				for="file-upload"
-				class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg cursor-pointer"
-			>
-				Upload
-			</label>
-			<input id="file-upload" type="file" multiple class="hidden" on:change={handleFileUpload} />
-			<button
-				class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg"
-				on:click={sendMessage}
-			>
-				Send
-			</button>
+			  {/each}
+			</div>
+		  {/if}
+		  <label
+			for="file-upload"
+			class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg cursor-pointer"
+		  >
+			Upload
+		  </label>
+		  <input id="file-upload" type="file" multiple class="hidden" on:change={handleFileUpload} />
+		  <select
+			bind:value={selectedModelVersion}
+			class="bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+		  >
+			{#each Array(7) as _, i}
+			  <option value="v{i+1}">v{i+1}</option>
+			{/each}
+		  </select>
+		  <button
+			class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg"
+			on:click={sendMessage}
+		  >
+			Send
+		  </button>
 		</div>
 		<p class="text-xs text-gray-600 text-center mt-2 mb-4">
-			This tool is not a replacement for a human expert opinion. Please follow your company's
-			internal governance process to make final decisions on actions.
+		  This tool is not a replacement for a human expert opinion. Please follow your company's
+		  internal governance process to make final decisions on actions.
 		</p>
+	  </div>
 	</div>
-</div>
 
 <style>
 	.message-container {

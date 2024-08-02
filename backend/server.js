@@ -17,12 +17,21 @@ const statAsync = promisify(fs.stat);
 const crypto = require('crypto')
 const {VectorStore} = require("./AIModule/VectorStore.js")
 const {OpenAIModel} = require("./AIModule/OpenAIModel")
-const {FirstWorkFlow , SecondWorkFlow, ThirdWorkFlow} = require("./AIModule/FirstWorkFlow")
+const WF = require("./AIModule/FirstWorkFlow")
 
 const openaiModel = new OpenAIModel()
-const workflow = new FirstWorkFlow( openaiModel ,  VectorStore)
-const secondWorkflow = new SecondWorkFlow(openaiModel , VectorStore)
-const thirdWorkflow = new ThirdWorkFlow(openaiModel , VectorStore , process.env.TAVILY_API_KEY)
+// const workflow = new FirstWorkFlow( openaiModel ,  VectorStore)
+// const secondWorkflow = new SecondWorkFlow(openaiModel , VectorStore)
+// const thirdWorkflow = new WF.ThirdWorkFlow(openaiModel , VectorStore , process.env.TAVILY_API_KEY)
+const models = {
+  "v1" : new WF.FirstWorkFlow( openaiModel ,  VectorStore),
+  "v2" :  new WF.SecondWorkFlow( openaiModel ,  VectorStore),
+  "v3" : new WF.ThirdWorkFlow(openaiModel , VectorStore , process.env.TAVILY_API_KEY),
+  "v4" : new WF.ThirdWorkFlowNoInternet(openaiModel ,  VectorStore),
+  "v5" : new WF.FourthWorkFlow(openaiModel ,  VectorStore),
+  "v6" : new WF.FirstWorkFlow(openaiModel ,  VectorStore),
+  "v7" : new  WF.SixthWorkFlow(openaiModel , VectorStore , process.env.TAVILY_API_KEY),
+}
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -106,6 +115,7 @@ app.post('/get-response', upload.array('attachments'), async (req, res) => {
     const messageContent = JSON.parse(req.body.messageContent);
     const threadId = req.body.threadId
     const threadName = req.body.threadName
+    const modelVersion = req.body.modelVersion
     
     
     
@@ -134,7 +144,7 @@ app.post('/get-response', upload.array('attachments'), async (req, res) => {
       { role: 'user', content: userMessageContent }
     ];
 
-    const workflowResponse = await thirdWorkflow.getResponse(messages)
+    const workflowResponse = await models[modelVersion].getResponse(messages)
     console.log(workflowResponse)
 
     // Create new MessageContent object
