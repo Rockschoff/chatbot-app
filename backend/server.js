@@ -31,7 +31,8 @@ const models = {
   "v5" : new WF.FourthWorkFlow(openaiModel ,  VectorStore),
   "v6" : new WF.FirstWorkFlow(openaiModel ,  VectorStore),
   "v7" : new  WF.SixthWorkFlow(openaiModel , VectorStore , process.env.TAVILY_API_KEY),
-  "v8" : new WF.SeventhWorkFlow(openaiModel , VectorStore , process.env.TAVILY_API_KEY)
+  "v8" : new WF.SeventhWorkFlow(openaiModel , VectorStore , process.env.TAVILY_API_KEY),
+  "v9" : new WF.EighthWorkFlow(openaiModel , VectorStore , process.env.TAVILY_API_KEY)
 }
 
 const app = express();
@@ -68,7 +69,7 @@ async function readFileContent(file) {
   const extension = file.originalname.split('.').pop().toLowerCase();
   switch (extension) {
     case 'pdf':
-      const pdfData = await pdfParse(file.buffer);
+      const pdfData = await pdfParse(file.path);
       return pdfData.text;
     case 'docx':
       const result = await mammoth.extractRawText({ path: file.path });
@@ -121,7 +122,7 @@ app.post('/get-response', upload.array('attachments'), async (req, res) => {
     
     
     const files = req.files;
-
+    console.log(files)
     // Read content from attachments
     const attachmentTexts = await Promise.all(files.map(readFileContent));
 

@@ -1148,6 +1148,145 @@ You can use more research paper like technical language.
     }
 }
 
+class EighthWorkFlow {
+    constructor(model, vectorStore, apiKey) {
+        this.model = model;
+        this.vectorStore = vectorStore;
+        this.apiKey = apiKey;
+        this.baseUrl = 'https://api.tavily.com/search';
+    }
+
+    async getResponse(messages) {
+        const lastMessage = messages[messages.length - 1].content;
+        console.log("Getting document type and keywords from the model");
+        const documentInfo = await this.getDocumentInfo(lastMessage);
+
+        console.log("Getting the relevant files");
+        const relevantFiles = await this.vectorStore.getRelevantFiles(documentInfo, 10);
+
+        console.log("Getting the relevant chunks from the vector store");
+        const relevantChunks = await this.vectorStore.getRelevantChunks(lastMessage, 25, relevantFiles);
+
+        console.log("Filtering duplicates from the relevant chunks");
+        let filteredChunks = this.removeDuplicateChunks(relevantChunks);
+
+        try {
+            console.log("Performing web search");
+            const searchResults = await this.tavilySearch(lastMessage);
+            const searchChunks = this.convertSearchResultsToChunks(searchResults);
+            filteredChunks = [...filteredChunks, ...searchChunks];
+        } catch (error) {
+            console.error('Error performing Tavily search:', error);
+            console.log("Continuing with local chunks only");
+        }
+
+        console.log("Compiling the context");
+        const context = this.prepareContextWithCitations(filteredChunks);
+
+        const promptTemplate = `
+You are an AI assistant specializing in Food Safety and Quality (FSQ), with particular expertise in FDA regulations and guidelines. Your role is to assist researchers and businesses in conducting research and making decisions backed by authoritative citations. Your audience consists of FSQ researchers and industry professionals, and your responses should be tailored to their expertise and interests. Use appropriate scientific terminology and industry jargon when relevant.
+
+Provide information based on the given context and web search results (if available). Your responses should be in markdown format and include inline citations for the information you use.
+
+When using information from the provided context, add a citation immediately after the statement. The citation should be a link in the format [file_name](./dashboard/file_name), where file_name is the name of the source file or URL. Do not edit the file names in the URLs. If there are spaces in the file names, format them as %20 as usual for a URL. For example if the name of file is "FDA food Guideline" cite this document as [FDA food Guideline](./dashboard/FDA%20food%20Guideline)
+
+Structure your response in a logical, research-oriented manner. Include a clear reasoning process and indicate the level of certainty for each statement based on the available citations. Use headings, subheadings, and bullet points where appropriate to enhance readability.
+
+Here are examples of how to use inline citations in markdown:
+
+1. The FDA recommends that consumers cook ground beef to a minimum internal temperature of 160°F (71°C) [FDA_Food_Safety_Guidelines](./dashboard/FDA_Food_Safety_Guidelines).
+
+2. According to recent studies, proper handwashing can reduce the risk of foodborne illness by up to 50% [CDC_Handwashing_Study](./dashboard/CDC_Handwashing_Study).
+
+3. The Food Safety Modernization Act (FSMA) has significantly impacted preventive controls in food processing facilities [FSMA_Preventive_Controls](./dashboard/FSMA_Preventive_Controls).
+
+Here's the context information:
+
+${context}
+
+Now, please respond to the following query in a manner that would be intellectually stimulating and informative for an FSQ researcher or industry professional:
+${lastMessage}
+
+Remember to:
+1. Emphasize your expertise in FDA regulations and guidelines.
+2. Use appropriate scientific terminology and FSQ jargon.
+3. Provide clear reasoning for your statements.
+4. Indicate the level of certainty for each claim based on the available citations.
+5. Structure your response in a research-oriented manner.
+6. Do not include a separate reference section at the end.
+7. Use inline citations as demonstrated in the examples above.
+8. Offer insights that could aid in research or decision-making processes.
+9. Only use the citations and sources that are directly relvant to the subject and question. But use them quite a bit.
+`;
+
+        messages[messages.length - 1].content = promptTemplate;
+        console.log("Getting model response");
+        const model_response = await this.model.getResponse(messages);
+        return { response: model_response, chunk_info: filteredChunks };
+    }
+
+    async getDocumentInfo(message) {
+        const prompt = `
+Given the following message, please suggest:
+1. Descriptions of documents that would be most relevant to answer this query, focusing on FDA regulations and guidelines.
+2. A list of keywords that would be useful for searching these documents.
+
+User's message: "${message}"
+
+Please format your response as follows:
+Document descriptions:
+- Description 1
+- Description 2
+...
+
+Keywords:
+- Keyword 1
+- Keyword 2
+...
+`;
+        const response = await this.model.getResponse([{ role: "user", content: prompt }]);
+        return response + "\n\nUser's message: " + message;
+    }
+
+    async tavilySearch(query) {
+        const response = await axios.post(this.baseUrl, {
+            api_key: this.apiKey,
+            query: query + " (FDA OR 'Food and Drug Administration' OR 'food safety compliance' OR 'food safety standards')",
+            search_depth: "advanced",
+            include_images: false,
+            include_answer: false,
+            include_raw_content: false,
+            max_results: 5,
+            domain_list: ["fda.gov", "cdc.gov", "foodsafety.gov"]
+        });
+
+        return response.data.results;
+    }
+
+    convertSearchResultsToChunks(searchResults) {
+        return searchResults.map(result => ({
+            chunk_content: result.content,
+            file_name: result.url,
+            page_number: result.url
+        }));
+    }
+
+    removeDuplicateChunks(chunks) {
+        const seen = new Map();
+        chunks.forEach(chunk => {
+            if (!seen.has(chunk.chunk_content) || seen.get(chunk.chunk_content).page_number > chunk.page_number) {
+                seen.set(chunk.chunk_content, chunk);
+            }
+        });
+        return Array.from(seen.values());
+    }
+
+    prepareContextWithCitations(chunks) {
+        return chunks.map((chunk, index) => {
+            return `[CHUNK${index + 1}]\n${chunk.chunk_content}\n[/CHUNK${index + 1}]\n(Source: ${chunk.file_name}, Page: ${chunk.page_number})`;
+        }).join("\n\n");
+    }
+}
 
 module.exports = { FirstWorkFlow ,
      SecondWorkFlow ,
@@ -1156,4 +1295,5 @@ module.exports = { FirstWorkFlow ,
         FourthWorkFlow ,
          FifthWorkFlow,
           SixthWorkFlow,
-        SeventhWorkFlow };
+        SeventhWorkFlow,
+        EighthWorkFlow };
