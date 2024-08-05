@@ -1,10 +1,5 @@
 import {error} from "@sveltejs/kit"
-import {OpenAI} from 'openai'
 
-const openai = new OpenAI({
-    apiKey: import.meta.env.VITE_OPENAI_APIKEY,
-    dangerouslyAllowBrowser: true
-});
 
 export async function load({params}){
     console.log(params)
@@ -18,8 +13,8 @@ export async function load({params}){
     // console.log("found the file" , file)
     // if (!file) throw error(404)
     return {
-        file_name : params.file_id,
-        file_id : params.file_id
+        file_name : "files/"+ params.file_id,
+        file_id : "files/"+ params.file_id
     }
 }
 

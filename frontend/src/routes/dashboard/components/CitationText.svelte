@@ -21,10 +21,13 @@
 		showModal.set(false);
 	}
 
-	function visitFile(file_name:string) {
-    if (file_name.startsWith("https://")) {
+	function visitFile() {
+		console.log(file_name)
+    if (file_name.substring(0,5)==("https")) {
+		console.log("to the net")
         window.open(file_name, '_blank');
     } else {
+		console.log("to the file")
         window.open(`${window.location.pathname}/${file_name}`, '_blank');
     }
 }

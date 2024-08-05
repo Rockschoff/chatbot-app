@@ -54,6 +54,11 @@
 		links.forEach(link => {
 			link.setAttribute('target', '_blank');
 			link.setAttribute('rel', 'noopener noreferrer'); // Security best practice
+			if (link.href.startsWith('https://')) {
+            console.log('This link is secure:', link.href);
+			} else {
+				console.log('This link is not secure:', link.href);
+			}
 		});
 	}
 

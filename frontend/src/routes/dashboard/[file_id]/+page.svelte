@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { storage, getDownloadURL, ref } from '$lib/firebase/firebase.client.js';
+	import { storage, getDownloadURL, ref, listAll } from '$lib/firebase/firebase.client.js';
 	import { onMount } from 'svelte';
 	import PdfVeiwer from './components/PDFVeiwer.svelte';
 	export let data;
@@ -28,16 +28,90 @@
 		checking = false;
 	});
 
+	// async function fetchPDF(file_name: string) {
+	// 	try {
+	// 		const storageRef = ref(storage, file_name);
+	// 		pdfUrl = await getDownloadURL(storageRef);
+	// 		fileExists = true;
+	// 	} catch (err) {
+	// 		console.log('Error loading pdf url');
+	// 		fileExists = false;
+	// 	}
+	// }
+
 	async function fetchPDF(file_name: string) {
-		try {
-			const storageRef = ref(storage, file_name);
-			pdfUrl = await getDownloadURL(storageRef);
-			fileExists = true;
-		} catch (err) {
-			console.log('Error loading pdf url');
-			fileExists = false;
-		}
-	}
+  try {
+    const storageRef = ref(storage, file_name);
+    pdfUrl = await getDownloadURL(storageRef);
+    fileExists = true;
+  } catch (err) {
+    console.log('Error loading pdf url, attempting to find similar file');
+    fileExists = false;
+    
+    try {
+      // List all files in the storage
+      const listResult = await listAll(ref(storage));
+      
+      // Find the most similar filename
+      let closestMatch = '';
+      let highestSimilarity = 0;
+      
+      for (const item of listResult.items) {
+        const similarity = calculateSimilarity(file_name, item.name);
+        if (similarity > highestSimilarity) {
+          highestSimilarity = similarity;
+          closestMatch = item.name;
+        }
+      }
+      
+      if (closestMatch) {
+        const similarStorageRef = ref(storage, closestMatch);
+        pdfUrl = await getDownloadURL(similarStorageRef);
+        fileExists = true;
+        console.log(`Found similar file: ${closestMatch}`);
+      } else {
+        console.log('No similar file found');
+      }
+    } catch (err) {
+      console.log('Error finding similar file');
+    }
+  }
+}
+
+// Helper function to calculate similarity between two strings
+function calculateSimilarity(str1: string, str2: string): number {
+  // Implement your preferred string similarity algorithm here
+  // This is a simple example using Levenshtein distance
+  const distance = levenshteinDistance(str1, str2);
+  const maxLength = Math.max(str1.length, str2.length);
+  return 1 - distance / maxLength;
+}
+
+// Levenshtein distance calculation
+function levenshteinDistance(str1: string, str2: string): number {
+  const m = str1.length;
+  const n = str2.length;
+  const dp: number[][] = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
+
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (str1[i - 1] === str2[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1];
+      } else {
+        dp[i][j] = Math.min(
+          dp[i - 1][j] + 1,
+          dp[i][j - 1] + 1,
+          dp[i - 1][j - 1] + 1
+        );
+      }
+    }
+  }
+
+  return dp[m][n];
+}
 </script>
 
 <h1>{data.file_name}</h1>

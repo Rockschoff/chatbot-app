@@ -1162,22 +1162,27 @@ class EighthWorkFlow {
         const documentInfo = await this.getDocumentInfo(lastMessage);
 
         console.log("Getting the relevant files");
-        const relevantFiles = await this.vectorStore.getRelevantFiles(documentInfo, 10);
+        const relevantFilesPromise = this.vectorStore.getRelevantFiles(documentInfo, 10);
 
-        console.log("Getting the relevant chunks from the vector store");
-        const relevantChunks = await this.vectorStore.getRelevantChunks(lastMessage, 25, relevantFiles);
+        const relevantChunksPromise = relevantFilesPromise.then(relevantFiles => {
+            console.log("Getting the relevant chunks from the vector store");
+            return this.vectorStore.getRelevantChunks(lastMessage, 25, relevantFiles);
+        });
+
+        const tavilySearchPromise = this.tavilySearch(lastMessage).catch(error => {
+            console.error('Error performing Tavily search:', error);
+            return [];
+        });
+
+        const [relevantFiles, relevantChunks, searchResults] = await Promise.all([relevantFilesPromise, relevantChunksPromise, tavilySearchPromise]);
 
         console.log("Filtering duplicates from the relevant chunks");
         let filteredChunks = this.removeDuplicateChunks(relevantChunks);
 
-        try {
-            console.log("Performing web search");
-            const searchResults = await this.tavilySearch(lastMessage);
+        if (searchResults.length > 0) {
+            console.log("Converting search results to chunks");
             const searchChunks = this.convertSearchResultsToChunks(searchResults);
             filteredChunks = [...filteredChunks, ...searchChunks];
-        } catch (error) {
-            console.error('Error performing Tavily search:', error);
-            console.log("Continuing with local chunks only");
         }
 
         console.log("Compiling the context");
@@ -1188,17 +1193,21 @@ You are an AI assistant specializing in Food Safety and Quality (FSQ), with part
 
 Provide information based on the given context and web search results (if available). Your responses should be in markdown format and include inline citations for the information you use.
 
-When using information from the provided context, add a citation immediately after the statement. The citation should be a link in the format [file_name](./dashboard/file_name), where file_name is the name of the source file or URL. Do not edit the file names in the URLs. If there are spaces in the file names, format them as %20 as usual for a URL. For example if the name of file is "FDA food Guideline" cite this document as [FDA food Guideline](./dashboard/FDA%20food%20Guideline)
+When using information from the provided context, add a citation immediately after the statement. The citation should be a link in the format [file_name](./dashboard/file_name), where file_name is the name of the source file or URL. Do not edit the file names in the URLs. If there are spaces in the file names, format them as %20 as usual for a URL. If the source is a URL, cite it directly as [URL](URL).
 
 Structure your response in a logical, research-oriented manner. Include a clear reasoning process and indicate the level of certainty for each statement based on the available citations. Use headings, subheadings, and bullet points where appropriate to enhance readability.
 
-Here are examples of how to use inline citations in markdown:
+Here are EXAMPLES of how to use inline citations in markdown:
 
 1. The FDA recommends that consumers cook ground beef to a minimum internal temperature of 160°F (71°C) [FDA_Food_Safety_Guidelines](./dashboard/FDA_Food_Safety_Guidelines).
 
 2. According to recent studies, proper handwashing can reduce the risk of foodborne illness by up to 50% [CDC_Handwashing_Study](./dashboard/CDC_Handwashing_Study).
 
 3. The Food Safety Modernization Act (FSMA) has significantly impacted preventive controls in food processing facilities [FSMA_Preventive_Controls](./dashboard/FSMA_Preventive_Controls).
+
+4. Here is a LinkedIn for Hudson Trading Group [LinkedIn][https://www.linkedin.com/company/hudsontradinggroup]
+
+5. You can get more information about the FDA from [FDA Official Website](https://www.fda.gov)
 
 Here's the context information:
 
@@ -1210,13 +1219,12 @@ ${lastMessage}
 Remember to:
 1. Emphasize your expertise in FDA regulations and guidelines.
 2. Use appropriate scientific terminology and FSQ jargon.
-3. Provide clear reasoning for your statements.
-4. Indicate the level of certainty for each claim based on the available citations.
+4. ONLY CITE THE FIlE NAMES AND URL GIVEN TO YOU IN THE CONTEXT INFORMATION
 5. Structure your response in a research-oriented manner.
 6. Do not include a separate reference section at the end.
 7. Use inline citations as demonstrated in the examples above.
-8. Offer insights that could aid in research or decision-making processes.
-9. Only use the citations and sources that are directly relvant to the subject and question. But use them quite a bit.
+9. Only use the citations and sources that are directly relevant to the subject and question, but use them extensively.
+10. VERY VERY IMPORTANT:  When using information from the provided context, add a citation immediately after the statement. The citation should be a link in the format [file_name](./dashboard/file_name), where file_name is the name of the source file or URL. Do not edit the file names in the URLs. If there are spaces in the file names, format them as %20 as usual for a URL. If the source is a URL, cite it directly as [URL](URL).
 `;
 
         messages[messages.length - 1].content = promptTemplate;
@@ -1257,7 +1265,7 @@ Keywords:
             include_answer: false,
             include_raw_content: false,
             max_results: 5,
-            domain_list: ["fda.gov", "cdc.gov", "foodsafety.gov"]
+            domain_list: ["fda.gov", "cdc.gov", "foodsafety.gov", "ecfr.gov"]
         });
 
         return response.data.results;
@@ -1283,7 +1291,7 @@ Keywords:
 
     prepareContextWithCitations(chunks) {
         return chunks.map((chunk, index) => {
-            return `[CHUNK${index + 1}]\n${chunk.chunk_content}\n[/CHUNK${index + 1}]\n(Source: ${chunk.file_name}, Page: ${chunk.page_number})`;
+            return `[CHUNK${index + 1}]\n${chunk.chunk_content}\n[/CHUNK${index + 1}]\n(${chunk.file_name.startsWith("https://")?"URL":"file_name"}: ${chunk.file_name})`;
         }).join("\n\n");
     }
 }
