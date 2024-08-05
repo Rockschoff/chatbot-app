@@ -1158,11 +1158,11 @@ class EighthWorkFlow {
 
     async getResponse(messages) {
         const lastMessage = messages[messages.length - 1].content;
-        console.log("Getting document type and keywords from the model");
-        const documentInfo = await this.getDocumentInfo(lastMessage);
+        console.log("Formulating key questions from the model");
+        const keyQuestions = await this.getKeyQuestions(lastMessage);
 
         console.log("Getting the relevant files");
-        const relevantFilesPromise = this.vectorStore.getRelevantFiles(documentInfo, 10);
+        const relevantFilesPromise = this.vectorStore.getRelevantFiles(keyQuestions, 10);
 
         const relevantChunksPromise = relevantFilesPromise.then(relevantFiles => {
             console.log("Getting the relevant chunks from the vector store");
@@ -1186,7 +1186,7 @@ class EighthWorkFlow {
         }
 
         console.log("Compiling the context");
-        const context = this.prepareContextWithCitations(filteredChunks);
+        const context = this.prepareContextWithCitations(filteredChunks, keyQuestions);
 
         const promptTemplate = `
 You are an AI assistant specializing in Food Safety and Quality (FSQ), with particular expertise in FDA regulations and guidelines. Your role is to assist researchers and businesses in conducting research and making decisions backed by authoritative citations. Your audience consists of FSQ researchers and industry professionals, and your responses should be tailored to their expertise and interests. Use appropriate scientific terminology and industry jargon when relevant.
@@ -1233,23 +1233,19 @@ Remember to:
         return { response: model_response, chunk_info: filteredChunks };
     }
 
-    async getDocumentInfo(message) {
+    async getKeyQuestions(message) {
         const prompt = `
 Given the following message, please suggest:
-1. Descriptions of documents that would be most relevant to answer this query, focusing on FDA regulations and guidelines.
-2. A list of keywords that would be useful for searching these documents.
+1. Formulate 3 to 5 key questions that need to be answered to address this query, focusing on FDA regulations and guidelines.
+2. the question must include the keywords and descriptions  that will be helpful in search requried fda documentation
+3. The question should be relvant to the user query and constructivly build towards the answer.
 
 User's message: "${message}"
 
 Please format your response as follows:
-Document descriptions:
-- Description 1
-- Description 2
-...
-
-Keywords:
-- Keyword 1
-- Keyword 2
+Key questions:
+1. Question 1
+2. Question 2
 ...
 `;
         const response = await this.model.getResponse([{ role: "user", content: prompt }]);
@@ -1259,7 +1255,7 @@ Keywords:
     async tavilySearch(query) {
         const response = await axios.post(this.baseUrl, {
             api_key: this.apiKey,
-            query: query + " (FDA OR 'Food and Drug Administration' OR 'food safety compliance' OR 'food safety standards')",
+            query: query + " (***FDA ONLY*** OR 'Food and Drug Administration' OR 'food safety compliance' OR 'food safety standards')",
             search_depth: "advanced",
             include_images: false,
             include_answer: false,
@@ -1289,12 +1285,17 @@ Keywords:
         return Array.from(seen.values());
     }
 
-    prepareContextWithCitations(chunks) {
-        return chunks.map((chunk, index) => {
+    prepareContextWithCitations(chunks, keyQuestions) {
+        const questionsContext = `Relevant Question that can help the response ${keyQuestions}`
+
+        const chunksContext = chunks.map((chunk, index) => {
             return `[CHUNK${index + 1}]\n${chunk.chunk_content}\n[/CHUNK${index + 1}]\n(${chunk.file_name.startsWith("https://")?"URL":"file_name"}: ${chunk.file_name})`;
         }).join("\n\n");
+
+        return `${questionsContext}\n\n${chunksContext}`;
     }
 }
+
 
 module.exports = { FirstWorkFlow ,
      SecondWorkFlow ,
