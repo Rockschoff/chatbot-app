@@ -1199,15 +1199,17 @@ Structure your response in a logical, research-oriented manner. Include a clear 
 
 Here are EXAMPLES of how to use inline citations in markdown:
 
-1. The FDA recommends that consumers cook ground beef to a minimum internal temperature of 160°F (71°C) [FDA_Food_Safety_Guidelines](./dashboard/FDA_Food_Safety_Guidelines).
+EXAMPLE 1. The FDA recommends that consumers cook ground beef to a minimum internal temperature of 160°F (71°C) [FDA_Food_Safety_Guidelines](./dashboard/FDA_Food_Safety_Guidelines).
 
-2. According to recent studies, proper handwashing can reduce the risk of foodborne illness by up to 50% [CDC_Handwashing_Study](./dashboard/CDC_Handwashing_Study).
+EXAMPLE 2. According to recent studies, proper handwashing can reduce the risk of foodborne illness by up to 50% [CDC_Handwashing_Study](./dashboard/CDC_Handwashing_Study).
 
-3. The Food Safety Modernization Act (FSMA) has significantly impacted preventive controls in food processing facilities [FSMA_Preventive_Controls](./dashboard/FSMA_Preventive_Controls).
+EXAMPLE 3. The Food Safety Modernization Act (FSMA) has significantly impacted preventive controls in food processing facilities [FSMA_Preventive_Controls](./dashboard/FSMA_Preventive_Controls).
 
-4. Here is a LinkedIn for Hudson Trading Group [LinkedIn][https://www.linkedin.com/company/hudsontradinggroup]
+EXAMPLE 4. Here is a LinkedIn for Hudson Trading Group [LinkedIn][https://www.linkedin.com/company/hudsontradinggroup]
 
-5. You can get more information about the FDA from [FDA Official Website](https://www.fda.gov)
+EXAMPLE 5. You can get more information about the FDA from [FDA Official Website](https://www.fda.gov)
+
+EXAMPLE 6. VQIP is a voluntary, fee-based program instituted by the FDA, designed to facilitate faster importation processes for companies showcasing exemplary safety practices in their supply chain management. It is an integral part of the FDA Food Safety Modernization Act (FSMA), ensuring that companies adhere to stringent safety audits and certifications [Guidance for Industry FDAs Voluntary Qualified Importer Program.pdf][./dashboard/Guidance%20for%20Industry%20FDAs%20Voluntary%20Qualified%20Importer%20Program.pdf]
 
 Here's the context information:
 
