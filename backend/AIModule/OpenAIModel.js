@@ -6,7 +6,7 @@ class OpenAIModel  {
     constructor(){
         try{
             this.model = new OpenAI({apiKey: process.env.OPENAI_APIKEY});
-            this.model_info = {provider : 'openai' , model_name : "gpt-4o" }
+            this.model_info = {provider : 'openai' , model_name : "gpt-4o-2024-08-06" }
         }catch(error){
             console.error("Error Initializing OpenAI Model" , error)
         }
