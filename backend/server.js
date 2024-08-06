@@ -6,10 +6,13 @@ const { connectToDatabase, ...mongodbDAO } = require('./utils/mongodbDAO');
 const multer = require('multer');
 const pdfParse = require('pdf-parse');
 const mammoth = require('mammoth');
+// const pptxParser = require('pptx-parser');
+const pptx2json = require('pptx2json');
 const XLSX = require('xlsx');
 const csv = require('csv-parser');
 const { OpenAI } = require('openai');
-const fs = require('fs').promises;
+const fsp = require("fs").promises;
+const fs = require("fs")
 const path = require('path');
 const { promisify } = require('util');
 const readdirAsync = promisify(fs.readdir);
@@ -17,6 +20,7 @@ const statAsync = promisify(fs.stat);
 const crypto = require('crypto')
 const {VectorStore} = require("./AIModule/VectorStore.js")
 const {OpenAIModel} = require("./AIModule/OpenAIModel")
+
 const WF = require("./AIModule/FirstWorkFlow")
 
 const openaiModel = new OpenAIModel()
@@ -51,7 +55,7 @@ const uploadVectorFile = multer({ dest: 'VectorFile/' });
 
 async function deleteFile(filePath) {
   try {
-    await fs.unlink(filePath);
+    await fsp.unlink(filePath);
     console.log(`Successfully deleted file: ${filePath}`);
   } catch (error) {
     console.error(`Error deleting file ${filePath}:`, error);
@@ -76,8 +80,14 @@ async function readFileContent(file) {
       return result.value;
     case 'ppt':
     case 'pptx':
-      // Implement PPT reading logic (requires additional library)
-      return 'PPT content extraction not implemented';
+      return new Promise((resolve, reject) => {
+        pptx2json.parse(file.path)
+          .then(data => {
+            const content = data.slides.map(slide => slide.text).join('\n');
+            resolve(content);
+          })
+          .catch(reject);
+      });
     case 'csv':
       return new Promise((resolve, reject) => {
         let content = '';
@@ -138,8 +148,18 @@ app.post('/get-response', upload.array('attachments'), async (req, res) => {
     const lastMessages = thread ? thread.messages.slice(-10) : [];
     // Prepare messages for OpenAI API
     const attachmentContent = attachmentTexts.join('\n');
-    const userMessageContent = `${messageContent.senderName}: ${messageContent.messageText}` + (attachmentContent ? `\n\nAttachment contents:\n${attachmentContent}` : '');
-    
+    let userMessageContent='';
+    const instructions = `please  distill this document to its most releant points that are to decrese the size of attachment content withou compromising any information that will be useful \n\nAttachment contents:\n${attachmentContent}`
+    if(attachmentContent){
+      const summarizedAttachment = await openaiModel.getResponse(
+        [{role : "system", content : "you are an helpful assistant for Food Safety and Quality Experts"},
+      {role :  'user' , content : instructions}]
+      );
+      console.log(summarizedAttachment)
+      userMessageContent = `${messageContent.senderName}: ${messageContent.messageText}` + (summarizedAttachment ? `\n\nAttachment contents:\n${summarizedAttachment}` : '');
+    }else{
+      userMessageContent = `${messageContent.senderName}: ${messageContent.messageText}` + ( attachmentContent? `\n\nAttachment contents:\n${attachmentContent}` : '');
+    }
     const messages = [
       { role: 'system', content: 'You are a helpful assistant.' },
       ...lastMessages.map(msg => ({ role: 'user', content: msg.messageText })),

@@ -54,6 +54,12 @@
   "pdf-parse": "^1.1.1",
   
     
+  "pptx-parser": "^1.1.7-beta.9",
+  
+    
+  "pptx2json": "^0.0.10",
+  
+    
   "xlsx": "^0.18.5"
   
   }

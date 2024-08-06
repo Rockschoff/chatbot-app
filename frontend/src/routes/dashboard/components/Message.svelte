@@ -50,17 +50,19 @@
 
 	// Function to modify all links to open in a new tab
 	function setLinksToOpenInNewTab() {
-		const links = document.querySelectorAll('#message-content a');
-		links.forEach(link => {
-			link.setAttribute('target', '_blank');
-			link.setAttribute('rel', 'noopener noreferrer'); // Security best practice
-			if (link.href.startsWith('https://')) {
+    const links = document.querySelectorAll('#message-content a');
+    links.forEach(link => {
+        link.setAttribute('target', '_blank');
+        link.setAttribute('rel', 'noopener noreferrer'); // Security best practice
+
+        if (link.href.startsWith('https://')) {
             console.log('This link is secure:', link.href);
-			} else {
-				console.log('This link is not secure:', link.href);
-			}
-		});
-	}
+        } else {
+            console.log('This link is not secure:', link.href);
+            link.textContent = link.textContent.replace(/%20/g, ' ');
+        }
+    });
+}
 
 	// Apply the function on component mount and whenever htmlMessage changes
 	onMount(() => {

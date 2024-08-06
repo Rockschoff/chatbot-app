@@ -34,7 +34,7 @@
 	export let messageContentList: MessageContent[];
 	let files: File[] = [];
 	let messageInput = '';
-	let modelOptions : number[] = [3,4,6,8, 9]
+	let modelOptions : number[] = [9]
 	let selectedModelVersion = `v${modelOptions[0]}`; // Default to v1
 	export let threadId: string;
 
