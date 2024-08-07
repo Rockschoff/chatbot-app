@@ -45,7 +45,7 @@ const port = process.env.PORT || 3000;
 app.use(bodyParser.json());
 const openai = new OpenAI({ apiKey: process.env.OPENAI_APIKEY });
 const corsOptions = {
-  origin: ['http://18.191.242.226', 'http://localhost:5173' , 'https://inq-center.innovaqual.com', 'http://localhost:3001', "https://testbot.innovaqual.com" ],
+  origin: ['http://18.191.242.226', 'http://localhost:7000' , 'https://inq-center.innovaqual.com', 'http://localhost:3001', "https://testbot.innovaqual.com" ],
   optionsSuccessStatus: 200
 };
 
