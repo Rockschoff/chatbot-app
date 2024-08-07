@@ -239,7 +239,7 @@
 		background-size: contain;
 		opacity: 0.2;
 		pointer-events: none;
-		z-index: 1;
+		z-index: -1;
 	}
 
 	.message-container > * {
