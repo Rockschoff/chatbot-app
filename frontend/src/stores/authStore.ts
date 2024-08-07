@@ -18,7 +18,7 @@ export const authHandlers = {
             (userCredential)=>{
                 const user = userCredential.user;
                 updateProfile(user,{
-                    displayName:firstName+" "+lastName
+                    displayName:fname+" "+lname
                 }).then(()=>{console.log("profile was updated with the name")})
                 .catch((err)=>{console.error("error updated the profile" , err)})
             }
