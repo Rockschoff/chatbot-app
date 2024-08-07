@@ -5,5 +5,8 @@ export default defineConfig({
 	plugins: [sveltekit()],
 	optimizeDeps: {
 		include: ['pdfjs-dist', 'xlsx', 'papaparse', 'mammoth', "jszip"]
-	  }
+	  },
+	server:{
+		port : 7000
+	}
 });
