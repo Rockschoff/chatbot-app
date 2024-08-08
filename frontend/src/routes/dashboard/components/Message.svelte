@@ -49,7 +49,6 @@
 	$: imageUrl = profilePicUrl || ''; // Use 'default-image' or leave blank
 	$: hasImage = Boolean(profilePicUrl);
 	$: isINQCenter = senderName === "IN-Q Center";
-
 	// Convert Markdown to HTML
 	$: htmlMessage =marked(messageText || '');
 
@@ -70,7 +69,7 @@
 
 	
 }
-function likeMessage() {
+	function likeMessage() {
         liked = !liked;
         // Here you would typically send this information to your backend
     }

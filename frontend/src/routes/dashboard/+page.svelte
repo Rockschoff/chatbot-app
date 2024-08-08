@@ -3,11 +3,13 @@
 	import Chatbox from './components/Chatbox.svelte';
 	import { onMount } from 'svelte';
 	import { auth } from '../../lib/firebase/firebase.client';
+	import { authStore, authHandlers } from '../../stores/authStore';
 
 	let user_id: string;
 	let user_name: string | null;
 	let user_entry: any;
 	let threads: { threadId: string; threadName: string }[] = [];
+	let show_sidebar : boolean = false;
 	const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 	interface citation {
@@ -108,7 +110,7 @@
 		}
 	}
 
-	async function handleNewChat(event: CustomEvent) {
+	async function handleNewChat(event: CustomEvent | {detail : {retrieval : boolean}}) {
 		if (!event.detail.retrieval) {
 			try {
 				threadId = await getThreadId();
@@ -144,11 +146,28 @@
 			loadThreads();
 		}
 	}
+
+	async function logout(){
+		await authHandlers.logout()
+	}
 </script>
 
 <div class="main-container bg-gray-200">
-	<div class="sidebar"><Sidebar on:newChat={handleNewChat} {threads} {user_id} {user_entry} /></div>
-	<div class="chat-window bg-gray-200 shadow-md">
+	<div class="sidemenu bg-gray-700 h-full w-20 flex flex-col justify-between items-center p-5">
+		<div class="flex flex-col items-center space-y-4">
+		  <svg id="chat-history" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="w-10 h-10 {show_sidebar?"fill-gray-400":"fill-gray-500"} hover:fill-gray-400" on:click={()=>{show_sidebar = !show_sidebar}}>
+			<path d="M32 32l448 0c17.7 0 32 14.3 32 32l0 32c0 17.7-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96L0 64C0 46.3 14.3 32 32 32zm0 128l448 0 0 256c0 35.3-28.7 64-64 64L96 480c-35.3 0-64-28.7-64-64l0-256zm128 80c0 8.8 7.2 16 16 16l160 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-160 0c-8.8 0-16 7.2-16 16z"/>
+		  </svg>
+		  <svg id="new-chat" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="w-10 h-10 fill-gray-500 hover:fill-blue-400" on:click={()=>{handleNewChat({detail:{retrieval : false}})}}>
+			<path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM232 344l0-64-64 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l64 0 0-64c0-13.3 10.7-24 24-24s24 10.7 24 24l0 64 64 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-64 0 0 64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"/>
+		  </svg>
+		</div>
+		<svg id="logout" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="w-10 h-10 fill-gray-500 hover:fill-red-400" on:click={logout}>
+		  <path d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"/>
+		</svg>
+	  </div>
+	<div class="sidebar {show_sidebar?"show":"hidden"}"><Sidebar on:newChat={handleNewChat} {threads} {user_id} {user_entry} /></div>
+	<div class="chat-window bg-gray-200 shadow-md w-full">
 		<Chatbox on:newMessage={handleNewMessage} {threadId} {user_id} {messageContentList} />
 	</div>
 </div>
@@ -167,9 +186,7 @@
 		height: auto;
 	}
 
-	.chat-window {
-		border-radius: 20px; /* Smaller radius on smaller screens */
-	}
+	
 
 	@media (min-width: 768px) {
 		/* Adjustments for tablets and desktops */
@@ -177,14 +194,13 @@
 			flex-direction: row;
 		}
 
-		.sidebar {
-			width: 25%; /* Larger sidebar on wider screens */
-			display: block; /* Ensure the sidebar is visible on larger screens */
+		.sidebar{
+			width : 25%;
 		}
-
+		
 		.chat-window {
-			width: 75%;
-			border-radius: 50px;
+		
+			
 		}
 	}
 
@@ -196,7 +212,7 @@
 		.chat-window {
 			width: 100%;
 			flex-grow: 1;
-			border-radius: 0; /* Remove border radius for full-width appearance */
+			 /* Remove border radius for full-width appearance */
 		}
 	}
 

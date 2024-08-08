@@ -1,6 +1,15 @@
 <script lang="ts">
 	import { onMount, createEventDispatcher } from 'svelte';
 	import Message from './Message.svelte';
+	import { slide } from 'svelte/transition';
+
+	let showFileUpload = false;
+
+	function toggleFileUpload() {
+	showFileUpload = !showFileUpload;
+}
+
+	let isActive=false;
 
 	function getCurrentDateTime() {
 		const now = new Date();
@@ -61,6 +70,7 @@
 
 	onMount(() => {
 		scrollToBottom();
+		document.addEventListener('click', handleClickOutside);
 	});
 
 	async function sendMessage() {
@@ -161,59 +171,89 @@
 	function removeFile(index: number) {
 		files = files.filter((_, i) => i !== index);
 	}
+
+	function toggleIsActive(){
+		isActive = true
+	}
+
+	function handleClickOutside(event:any) {
+    if (!event.target.closest('#input-area')) {
+      isActive = false;
+    }
+  }
+
 </script>
 
 <div class="flex flex-col h-full w-full justify-between p-4">
-	<div class="message-container space-y-4 relative w-full h-full">
+	<div class="message-container p-3 space-y-4 relative w-full h-full">
 		{#each messageContentList as message}
 			<Message {...message} />
 		{/each}
 	</div>
 
-	<div class="input-area bg-gray-200 w-full">
-		<div class="flex flex-row justify-center items-center space-x-2 px-4 py-2">
-		  <input
-			placeholder="Type your message here"
-			class="form-input flex-grow py-2 px-4 rounded-lg"
-			bind:value={messageInput}
-			on:keypress={handleEnterPress}
-		  />
-		  {#if files.length > 0}
-			<div class="file-info bg-gray-100 p-2 rounded-lg h-10 overflow-y-auto">
-			  {#each files as file, index}
-				<div class="flex items-center justify-between">
-				  <span>{file.name}</span>
-				  <button on:click={() => removeFile(index)} class="text-red-500 ml-2">×</button>
-				</div>
-			  {/each}
+	<div id="input-area" class="input-area transiton duration-300  border {isActive ? "bg-white" :"bg-transparent  border-gray-400"} w-full rounded-lg " on:click={toggleIsActive}>
+		<div class="flex flex-row items-center space-x-2 p-2">
+		  <div class="relative flex-grow">
+			<input
+			  placeholder="Type your message here"
+			  class="form-input w-full py-2 px-4 pr-24 rounded-lg border-none focus:outline-none  bg-transparent"
+			  bind:value={messageInput}
+			  on:keypress={handleEnterPress}
+			/>
+			<div class="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
+			  <button class="text-gray-500 hover:text-blue-500 focus:outline-none" on:click={toggleFileUpload}>
+				{#if showFileUpload}
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+						</svg>
+					{:else}
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+							</svg>
+				{/if}
+			  </button>
+			  <select
+				bind:value={selectedModelVersion}
+				class="bg-transparent text-gray-700 py-1 px-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+			  >
+				{#each modelOptions as option, i}
+				  <option value="v{option}">v{option}</option>
+				{/each}
+			  </select>
+			  <button
+				class="text-blue-500 hover:text-blue-700 focus:outline-none"
+				on:click={sendMessage}
+			  >
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+				  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+				</svg>
+			  </button>
 			</div>
-		  {/if}
-		  <label
-			for="file-upload"
-			class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg cursor-pointer"
-		  >
-			Upload
-		  </label>
-		  <input id="file-upload" type="file" multiple class="hidden" on:change={handleFileUpload} />
-		  <select
-			bind:value={selectedModelVersion}
-			class="bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-		  >
-			{#each modelOptions as option, i}
-			  <option value="v{option}">v{option}</option>
-			{/each}
-		  </select>
-		  <button
-			class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg"
-			on:click={sendMessage}
-		  >
-			Send
-		  </button>
+		  </div>
 		</div>
-		<p class="text-xs text-gray-600 text-center mt-2 mb-4">
-		  This tool is not a replacement for a human expert opinion. Please follow your company's
-		  internal governance process to make final decisions on actions.
-		</p>
+		
+		{#if showFileUpload}
+		  <div class="file-upload-area bg-gray-100 p-2 rounded-b-lg" transition:slide>
+			<input id="file-upload" type="file" multiple class="hidden" on:change={handleFileUpload} />
+			<label for="file-upload" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded cursor-pointer text-sm">
+			  Choose Files
+			</label>
+			{#if files.length > 0}
+			  <div class="mt-2 space-y-1">
+				{#each files as file, index}
+				  <div class="flex items-center justify-between bg-white p-1 rounded">
+					<span class="text-sm truncate">{file.name}</span>
+					<button on:click={() => removeFile(index)} class="text-red-500 ml-2 focus:outline-none">
+					  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+					  </svg>
+					</button>
+				  </div>
+				{/each}
+			  </div>
+			{/if}
+		  </div>
+		{/if}
 	  </div>
 	</div>
 
