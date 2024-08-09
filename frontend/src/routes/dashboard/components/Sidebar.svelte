@@ -76,12 +76,12 @@
     }
 </script>
 
-<div class="sidebar flex flex-col h-full bg-gray-900 text-white" class:hide={!showSidebar}>
-    <div class="profile flex items-center space-x-4 p-6 bg-gray-800 shadow-lg">
-        <div class="bg-gray-600 h-12 w-12 rounded-full"></div>
+<div class="sidebar flex flex-col h-full bg-white text-black  border-r-black border-r-2" class:hide={!showSidebar}>
+    <div class="profile flex items-center space-x-4 p-6 bg-white shadow-lg">
+        <div class="bg-black h-12 w-12 rounded-full"></div>
         {#if isEditing}
             <input
-                class="text-lg font-semibold text-white bg-gray-800 focus:outline-none"
+                class="text-lg font-semibold text-black bg-gray-800 focus:outline-none"
                 type="text"
                 bind:value={editableName}
                 on:blur={saveName}
@@ -91,23 +91,23 @@
             />
         {:else}
             <p
-                class="text-lg font-semibold text-white hover:underline cursor-pointer"
+                class="text-lg font-semibold text-black hover:underline cursor-pointer"
                 on:dblclick={editMode}
             >
                 {$authStore?.currentUser?.displayName}
             </p>
         {/if}
     </div>
-    <div class="chat-history flex-grow flex flex-col w-full bg-gray-800 p-4 overflow-y-auto">
-        <p class="font-bold text-xl text-white mb-2">Chat History</p>
+    <div class="chat-history flex-grow flex flex-col w-full bg-white  p-4 overflow-y-auto">
+        <p class="font-bold text-xl text-black mb-2">Chat History</p>
         <span class="text-sm text-gray-400 mb-4">feature available in Basic +</span>
         {#if true}
             {#each threads.slice().reverse() as thread, index}
                 <div
-                    class="w-full flex items-center p-3 bg-gray-700 mb-2 rounded-md shadow hover:bg-gray-600 cursor-pointer transition duration-200"
+                    class="w-full flex items-center p-3 bg-white mb-2 cursor-pointer transition duration-200 border-b-0 border-b-black hover:border-b-2"
                 >
                     <p
-                        class="text-gray-300 hover:underline flex-grow"
+                        class="text-gray-300 flex-grow hover:text-black"
                         on:click={() => {
                             loadMessages(thread.threadId, thread.threadName);
                         }}
@@ -115,7 +115,7 @@
                         {index + 1}. {thread.threadName}
                     </p>
                     <button
-                        class="text-red-500 hover:text-red-600 transition duration-200"
+                        class="text-gray-200 hover:text-gray-600 transition duration-200"
                         on:click={() => deleteThread(thread.threadId, thread.threadName)}
                     >
                         <FontAwesomeIcon icon={faTimes} />

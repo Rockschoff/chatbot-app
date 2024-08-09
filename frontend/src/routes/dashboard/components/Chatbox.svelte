@@ -191,7 +191,7 @@
 		{/each}
 	</div>
 
-	<div id="input-area" class="input-area transiton duration-300  border {isActive ? "bg-white" :"bg-transparent  border-gray-400"} w-full rounded-lg " on:click={toggleIsActive}>
+	<div id="input-area" class="input-area transiton duration-300  border-black bg-transparent {isActive ? "border-4" :"border-2"} w-full rounded-lg " on:click={toggleIsActive}>
 		<div class="flex flex-row items-center space-x-2 p-2">
 		  <div class="relative flex-grow">
 			<input
@@ -235,7 +235,7 @@
 		{#if showFileUpload}
 		  <div class="file-upload-area bg-gray-100 p-2 rounded-b-lg" transition:slide>
 			<input id="file-upload" type="file" multiple class="hidden" on:change={handleFileUpload} />
-			<label for="file-upload" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded cursor-pointer text-sm">
+			<label for="file-upload" class="bg-gray-800 hover:bg-black text-white font-bold py-1 px-3 rounded cursor-pointer text-sm">
 			  Choose Files
 			</label>
 			{#if files.length > 0}
@@ -243,7 +243,7 @@
 				{#each files as file, index}
 				  <div class="flex items-center justify-between bg-white p-1 rounded">
 					<span class="text-sm truncate">{file.name}</span>
-					<button on:click={() => removeFile(index)} class="text-red-500 ml-2 focus:outline-none">
+					<button on:click={() => removeFile(index)} class="text-black-500 ml-2 focus:outline-none">
 					  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
 					  </svg>

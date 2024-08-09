@@ -93,7 +93,7 @@
 	})
 </script>
 
-<div class="message-box bg-white rounded-lg shadow-sm p-4 mb-4 transition-all duration-300 hover:shadow-md"
+<div class="message-box  {senderName=="User"?"bg-gray-200":"bg-white"} rounded-lg shadow-sm p-4 mb-4 transition-all duration-300 hover:shadow-md border hover:border-r-black hover:border-l-black"
      in:fade="{{ duration: 300 }}">
     <div class="flex items-start space-x-3">
         {#if hasImage}

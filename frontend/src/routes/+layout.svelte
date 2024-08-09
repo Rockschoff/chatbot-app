@@ -70,11 +70,11 @@
 	});
 </script>
 
-<div class="navbar">
+<div class="navbar border-2 border-black">
 	<img class="logo" src="./logo.png" alt="company logo" />
 	<h1 class="heading-font center-heading">IN-Q compliance knowledge center</h1>
 	<div class="relative" on:click={toggleToolTip}>
-		<FontAwesomeIcon icon={faInfoCircle} class="info-icon" />
+		<FontAwesomeIcon icon={faInfoCircle} class="info-icon" style="color: black;" />
 	</div>
 </div>
 
