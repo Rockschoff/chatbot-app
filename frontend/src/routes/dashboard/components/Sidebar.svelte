@@ -18,11 +18,6 @@
 		await authHandlers.logout();
 	}
 
-	let showSidebar = true; // Controls the visibility of the sidebar
-
-	function toggleSidebar() {
-		showSidebar = !showSidebar;
-	}
 
 	function editMode() {
 		isEditing = true;
@@ -81,12 +76,12 @@
 	}
 </script>
 
-<div class="sidebar flex flex-col h-full" class:hide={!showSidebar}>
-	<div class="profile flex items-center space-x-4 p-10 bg-gray-200 shadow-lg blurred-border">
-		<div class="bg-gray-400 h-12 w-12 rounded-full"></div>
+<div class="sidebar flex flex-col h-full bg-gray-900 text-white">
+	<div class="profile flex items-center space-x-4 p-6 bg-gray-800 shadow-lg">
+		<div class="bg-gray-600 h-12 w-12 rounded-full"></div>
 		{#if isEditing}
 			<input
-				class="text-lg font-semibold text-gray-700"
+				class="text-lg font-semibold text-white bg-gray-800 focus:outline-none"
 				type="text"
 				bind:value={editableName}
 				on:blur={saveName}
@@ -96,23 +91,22 @@
 			/>
 		{:else}
 			<p
-				class="text-lg font-semibold text-gray-700 hover:underline cursor-pointer"
+				class="text-lg font-semibold text-white hover:underline cursor-pointer"
 				on:dblclick={editMode}
 			>
 				{$authStore?.currentUser?.displayName}
 			</p>
 		{/if}
 	</div>
-	<div class="chat-history flex-grow flex flex-col w-full bg-gray-100 p-5 overflow-y-auto">
-		<p class="font-bold hover-underline text-xl text-gray-800 mb-2">Chat History</p>
-		<span class="text-xs text-gray-600 mb-4">feature available in Basic +</span>
+	<div class="chat-history flex-grow flex flex-col w-full bg-gray-800 p-4  overflow-y-auto">
+		<p class="font-bold  text-xl text-white mb-2">Chat History</p>
 		{#if true}
 			{#each threads.slice().reverse() as thread, index}
 				<div
-					class="w-full flex items-center p-2 pl-5 bg-white mb-2 rounded-md shadow hover:bg-gray-200 cursor-pointer transition duration-200"
+					class="w-full flex items-center p-3 bg-gray-700 mb-2 rounded-md shadow hover:bg-gray-600 cursor-pointer transition duration-200"
 				>
 					<p
-						class="text-gray-600 hover-underline flex-grow"
+						class="text-gray-300 hover-underline flex-grow"
 						on:click={() => {
 							loadMessages(thread.thread_id, thread.thread_name);
 						}}
@@ -120,43 +114,15 @@
 						{index + 1}. {thread.thread_name}
 					</p>
 					<button
-						class="text-red-600 hover:text-red-800 transition duration-200"
+						class="text-red-500 hover:text-red-600 transition duration-200"
 						on:click={() => deleteThread(thread.thread_id, thread.thread_name)}
 					>
 						<FontAwesomeIcon icon={faTimes} />
 					</button>
 				</div>
 			{/each}
-		{:else}
-			{#each lockedHistory as thread, index}
-				<div
-					class="w-full flex items-center p-2 pl-5 bg-white mb-2 rounded-md shadow hover:bg-gray-200 cursor-pointer transition duration-200"
-				>
-					<p class="text-gray-600 hover-underline flex-grow">
-						{index + 1}. {thread}
-					</p>
-					<!-- <button
-						class="text-red-600 hover:text-red-800 transition duration-200"
-						on:click={() => deleteThread(thread.thread_id, thread.thread_name)}
-					>
-						<FontAwesomeIcon icon={faTimes} />
-					</button> -->
-				</div>
-			{/each}
 		{/if}
 	</div>
-	<button
-		class="w-full p-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 rounded-md transition duration-200 ease-in-out text-center mb-4"
-		on:click={startNewChat}
-	>
-		New Chat
-	</button>
-	<button
-		class="w-full p-2 bg-gray-200 hover:bg-red-200 hover:text-red-400 text-gray-400 text-white font-bold py-2 rounded-md transition duration-200 ease-in-out text-center mt-auto mb-4"
-		on:click={logout}
-	>
-		Log Out
-	</button>
 </div>
 
 <style>
@@ -194,11 +160,6 @@
 		}
 	}
 
-	.hide {
-		transform: translateX(-100%);
-		transition: transform 0.3s ease-in-out;
-		display: none;
-	}
 
 	input {
 		max-width: 200px; /* Limit input size to avoid layout shift */
