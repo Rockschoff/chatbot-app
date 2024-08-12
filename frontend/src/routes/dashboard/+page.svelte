@@ -278,7 +278,7 @@
 		</svg>
 	  </div>
 	<div class="sidebar {showSidebar?"show":"hidden"}"><Sidebar on:newChat={handleNewChat} {threads} {user_id} {user_entry} /></div>
-	<div class="chat-window bg-gray-200 w-full">
+	<div class="chat-window w-full">
 		<Chatbox on:newMessage={handleNewMessage} {threadId} {user_id} {messageContentList} />
 	</div>
 </div>
@@ -309,6 +309,10 @@
 
 		.sidebar{
 			width : 25%;
+		}
+
+		.chat-window{
+			background-color: #fdf6ed;
 		}
 
 		
