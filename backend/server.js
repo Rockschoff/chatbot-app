@@ -17,7 +17,7 @@ const openai =  new OpenAI({
 app.use(bodyParser.json());
 
 const corsOptions = {
-  origin: ['http://18.191.242.226', 'http://localhost:5173' , 'https://inq-center.innovaqual.com'],
+  origin: ['http://18.191.242.226', 'http://localhost:5173' , 'https://inq-center.innovaqual.com' , "http://localhost:3000"],
   optionsSuccessStatus: 200
 };
 
@@ -104,7 +104,7 @@ app.post('/add-message', async (req, res) => {
   if (!user_id || !thread_id || !messageContent) {
     return res.status(400).send('Missing required fields');
   }
-  console.log(messageContent)
+  // console.log(messageContent)
   if (!messageContent.senderName || !messageContent.messageTime || !messageContent.messageText) {
     return res.status(400).send('Invalid message content');
   }

@@ -9,7 +9,7 @@
 	// import mammoth from 'mammoth';
 	// import JSZip from 'jszip';
 	import getFileText from './fileReader';
-	import getResponse, {GetToolResponse} from "../../../lib/openAICaller"
+	import getResponse, {GetToolResponse , getThreadName} from "../../../lib/openAICaller"
 	import { faScrollTorah } from '@fortawesome/free-solid-svg-icons';
 
 	const dispatch = createEventDispatcher();
@@ -92,11 +92,12 @@
 				citationList: []
 			};
 			messageContentList = [...messageContentList, newMessage];
+			const generated_thread_name =  getThreadName(messageContentList[0].messageText)
 			dispatch('newMessage', {
 				num_messages: messageContentList.length,
 				user_id: user_id,
 				thread_id: threadId,
-				thread_name: messageContentList[0].messageText.substring(0, 10) + '...',
+				thread_name: generated_thread_name,
 				message_content: newMessage
 			});
 			scrollToBottom();

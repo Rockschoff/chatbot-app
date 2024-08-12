@@ -223,9 +223,10 @@
 
 	async function handleNewMessage(event: CustomEvent) {
 		if (event.detail.num_messages == 1) {
+			const name = await event.detail.thread_name
 			await addThread(
 				threadId,
-				event.detail.thread_name ? event.detail.thread_name : getCurrentDateTime()
+				name
 			);
 			await loadThreads();
 			console.log('New thread was added');
