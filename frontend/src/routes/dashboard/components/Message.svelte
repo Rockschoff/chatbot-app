@@ -136,7 +136,7 @@
                 <div class="mt-3 pt-3 border-t border-gray-200">
                     <h5 class="text-xs font-semibold text-gray-600 mb-2">Citations:</h5>
                     {#each citationList as citation, index}
-                        <p class="text-xs text-blue-600 mb-1 hover:underline" on:click={()=>{goto(`./dashboard/${citation.file_id}`)}}>
+                        <p class="text-xs text-blue-600 mb-1 hover:underline" on:click={()=>{window.open(`./dashboard/${citation.file_id}`, '_blank')}}>
                             {index + 1}.) <CitationText file_id={citation.file_id} />
                         </p>
                     {/each}
