@@ -16,7 +16,10 @@ export async function load({params}){
     }
     
     console.log("found the file" , file)
-    if (!file) throw error(404)
+    if (!file) {
+        console.log("file not foung in openai")
+        console.log("waht is thid")
+    }
     return {
         file_name : file.filename,
         file_id : params.file_id

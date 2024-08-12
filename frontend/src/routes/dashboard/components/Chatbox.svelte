@@ -9,6 +9,8 @@
 	// import mammoth from 'mammoth';
 	// import JSZip from 'jszip';
 	import getFileText from './fileReader';
+	import getResponse, {GetToolResponse} from "../../../lib/openAICaller"
+	import { faScrollTorah } from '@fortawesome/free-solid-svg-icons';
 
 	const dispatch = createEventDispatcher();
 
@@ -98,7 +100,10 @@
 				message_content: newMessage
 			});
 			scrollToBottom();
+
+			console.log("sedningmessage to opneai")
 			await sendToOpenAI(messageInput);
+			console.log("got the message from openai")
 			dispatch('newMessage', {
 				num_messages: messageContentList.length,
 				user_id: user_id,
@@ -119,43 +124,144 @@
 
 		console.log('content : ', content);
 		await openai.beta.threads.messages.create(threadId, { role: 'user', content });
+		console.log("message added to thread")
+		try{
 
-		const stream = await openai.beta.threads.runs.create(threadId, {
-			assistant_id: import.meta.env.VITE_ASSISTANTID, // vs_D1fKWaJJGI6QKCJRVIx5ekZE
-			stream: true
-		});
+			
+			const stream = await openai.beta.threads.runs.create(threadId, {
+				assistant_id: import.meta.env.VITE_ASSISTANTID, 
+				stream: true,
+				tool_choice: 'required'
+			});
+			
 
-		let botMessage: MessageContent = {
-			profilePicUrl: './small_logo.png',
-			senderName: 'In-Q Center',
-			messageTime: new Date().toLocaleTimeString(),
-			messageText: '',
-			citationList: []
-		};
-		messageContentList = [...messageContentList, botMessage];
+			let botMessage: MessageContent = {
+				profilePicUrl: './small_logo.png',
+				senderName: 'In-Q Center',
+				messageTime: new Date().toLocaleTimeString(),
+				messageText: '',
+				citationList: []
+			};
+			messageContentList = [...messageContentList, botMessage];
+
+			for await (const event of stream) {
+				if (event.event === "thread.run.requires_action"){
+					const tool_calls = event.data.required_action?.submit_tool_outputs.tool_calls
+					await TakeRequiredActions(tool_calls , event.data.id)
+					break
+				}
+				if (event.event === 'thread.message.delta') {
+					// const lastMessage = messageContentList[messageContentList.length - 1];
+					messageContentList[messageContentList.length - 1].messageText +=
+						event.data.delta.content[0].text.value;
+					if (event.data.delta.content[0].text.annotations?.length > 0) {
+						event.data.delta.content[0].text.annotations.forEach((ele) => {
+							if (ele?.file_citation) {
+								const ref: citation = {
+									file_id: ele.file_citation.file_id,
+									text: ele.text,
+									start_index: ele.start_index,
+									end_index: ele.end_index
+								};
+								// Check if citation with the same file_id already exists
+								const citationExists = messageContentList[messageContentList.length - 1].citationList?.some(
+									(citation) => citation.file_id === ref.file_id
+								);
+								// Add ref only if it doesn't already exist
+								if (!citationExists) {
+									messageContentList[messageContentList.length - 1].citationList?.push(ref);
+								}
+							}
+						});
+					}
+					scrollToBottom();
+				}
+			}
+
+		}catch(err){
+			console.log(err)
+		}		
+	}
+
+	async function TakeRequiredActions(tool_calls : any , run_id : string){
+		if(!threadId){
+			console.error("Thread Id not defined")
+		}
+		console.log("getting tool reponse")
+		const toolResponse = await GetToolResponse(tool_calls);
+		console.log("got tool reponse" , toolResponse)
+
+		const stream = await openai.beta.threads.runs.submitToolOutputs(
+			threadId,
+			run_id,
+			{
+				"tool_outputs" : toolResponse,
+				"stream" : true
+			}
+		)
 
 		for await (const event of stream) {
-			if (event.event === 'thread.message.delta') {
-				// const lastMessage = messageContentList[messageContentList.length - 1];
-				messageContentList[messageContentList.length - 1].messageText +=
-					event.data.delta.content[0].text.value;
-				if (event.data.delta.content[0].text.annotations?.length > 0) {
-					event.data.delta.content[0].text.annotations.forEach((ele) => {
-						if (ele?.file_citation) {
-							const ref: citation = {
-								file_id: ele.file_citation.file_id,
-								text: ele.text,
-								start_index: ele.start_index,
-								end_index: ele.end_index
-							};
-							messageContentList[messageContentList.length - 1].citationList?.push(ref);
-						}
-					});
+				if (event.event === "thread.run.requires_action"){
+					const tool_calls = event.data.required_action?.submit_tool_outputs.tool_calls
+					await TakeRequiredActions(tool_calls , event.data.id)
+					break
 				}
-				scrollToBottom();
+				if (event.event === 'thread.message.delta') {
+					// const lastMessage = messageContentList[messageContentList.length - 1];
+					messageContentList[messageContentList.length - 1].messageText +=
+						event.data.delta.content[0].text.value;
+					if (event.data.delta.content[0].text.annotations?.length > 0) {
+						event.data.delta.content[0].text.annotations.forEach((ele) => {
+							if (ele?.file_citation) {
+								const ref: citation = {
+									file_id: ele.file_citation.file_id,
+									text: ele.text,
+									start_index: ele.start_index,
+									end_index: ele.end_index
+								};
+								// Check if citation with the same file_id already exists
+								const citationExists = messageContentList[messageContentList.length - 1].citationList?.some(
+									(citation) => citation.file_id === ref.file_id
+								);
+								// Add ref only if it doesn't already exist
+								if (!citationExists) {
+									messageContentList[messageContentList.length - 1].citationList?.push(ref);
+								}
+							}
+						});
+					}
+					scrollToBottom();
+				}
 			}
-		}
+
 	}
+
+	// async function sendToOpenAI(userText : string){
+	// 	if(!threadId){
+	// 		return
+	// 	}
+
+
+	// 	const content = file_text
+	// 	? `Uploaded File Text: ${file_text}\n\nUser Input: ${userText}`
+	// 	: userText;
+		
+	// 	const thread = messageContentList.map((ele)=>{return {role : ele.senderName=="Me"?"user":"assistant" , content : ele.messageText}})
+
+	// 	let botMessage: MessageContent = {
+	// 		profilePicUrl: './small_logo.png',
+	// 		senderName: 'In-Q Center',
+	// 		messageTime: new Date().toLocaleTimeString(),
+	// 		messageText: '',
+	// 		citationList: []
+	// 	};
+	// 	messageContentList = [...messageContentList, botMessage];
+
+	// 	const botText :  string = await getResponse(thread);
+	// 	messageContentList[messageContentList.length-1].messageText = botText;
+	// 	scrollToBottom()
+
+	// }
 
 	function removeFile(index: number) {
 		files = files.filter((_, i) => i !== index);

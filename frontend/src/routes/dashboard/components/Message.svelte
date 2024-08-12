@@ -10,6 +10,7 @@
 	import { marked } from 'marked';
 	import CitationText from './CitationText.svelte';
 	import { fade } from 'svelte/transition';
+    import {goto} from "$app/navigation";
 
 	import OpenAI from 'openai';
 
@@ -69,9 +70,9 @@
         link.setAttribute('rel', 'noopener noreferrer'); // Security best practice
 
         if (link.href.startsWith('https://')) {
-            console.log('This link is secure:', link.href);
+            // console.log('This link is secure:', link.href);
         } else {
-            console.log('This link is not secure:', link.href);
+            // console.log('This link is not secure:', link.href);
             link.textContent = link.textContent.replace(/%20/g, ' ');
         }
     });
@@ -135,8 +136,8 @@
                 <div class="mt-3 pt-3 border-t border-gray-200">
                     <h5 class="text-xs font-semibold text-gray-600 mb-2">Citations:</h5>
                     {#each citationList as citation, index}
-                        <p class="text-xs text-gray-600 mb-1">
-                            {index + 1}.) <CitationText {...citation} />
+                        <p class="text-xs text-blue-600 mb-1 hover:underline" on:click={()=>{goto(`./dashboard/${citation.file_id}`)}}>
+                            {index + 1}.) <CitationText file_id={citation.file_id} />
                         </p>
                     {/each}
                 </div>

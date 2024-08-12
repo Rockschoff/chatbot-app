@@ -104,7 +104,7 @@ app.post('/add-message', async (req, res) => {
   if (!user_id || !thread_id || !messageContent) {
     return res.status(400).send('Missing required fields');
   }
-
+  console.log(messageContent)
   if (!messageContent.senderName || !messageContent.messageTime || !messageContent.messageText) {
     return res.status(400).send('Invalid message content');
   }

@@ -6,6 +6,7 @@
 	import { auth } from '../../lib/firebase/firebase.client';
 	import {authHandlers} from "../../stores/authStore"
 	import {goto} from "$app/navigation"
+	import {v4 as uuidv4} from "uuid"
 
 	let user_id: string;
 	let user_name: string | null;
@@ -52,8 +53,9 @@
 		const setup = async () => {
 			try {
 				const thread = await openai.beta.threads.create();
-				threadId = thread.id;
-
+				
+				threadId =  thread.id //uuidv4()
+				
 				unsubscribe = auth.onAuthStateChanged((user) => {
 					if (user) {
 						user_id = user.uid;
@@ -243,7 +245,7 @@
 			});
 
 			if (!response.ok) {
-				console.log(response);
+				console.log(response , event.detail.message_content );
 				throw new Error('Failed to add message');
 			}
 

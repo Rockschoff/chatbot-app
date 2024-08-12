@@ -24,6 +24,7 @@
 		// fileExists = result.exists;
 		// checking = false;
 		// fileExists = true;
+		console.log(data)
 		await fetchPDF(data.file_name);
 		checking = false;
 	});
