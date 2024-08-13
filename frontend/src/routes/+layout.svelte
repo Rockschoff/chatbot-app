@@ -49,6 +49,7 @@
 	import ToolTip from './components/ToolTip.svelte';
 	import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
 	import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';
+	import { page } from '$app/stores'; // Import the $page store
 	import '../app.css';
 
 	let tooltipVisible = false;
@@ -70,16 +71,17 @@
 	});
 </script>
 
-<div class="navbar">
-	<img class="logo" src="./logo.png" alt="company logo" />
-	<h1 class="heading-font center-heading">IN-Q compliance knowledge center</h1>
-	<div class="relative" on:click={toggleToolTip}>
-		<FontAwesomeIcon icon={faInfoCircle} class="info-icon" />
+{#if $page.url.pathname !== '/'} <!-- Check if the current path is not root -->
+	<div class="navbar">
+		<img class="logo" src="./logo.png" alt="company logo" />
+		<h1 class="heading-font center-heading">IN-Q compliance knowledge center</h1>
+		<div class="relative" on:click={toggleToolTip}>
+			<FontAwesomeIcon icon={faInfoCircle} class="info-icon" />
+		</div>
 	</div>
-</div>
 
-{#if tooltipVisible}
-	<ToolTip on:closeToolTip={() => (tooltipVisible = false)} />
+	{#if tooltipVisible}
+		<ToolTip on:closeToolTip={() => (tooltipVisible = false)} />
+	{/if}
 {/if}
-
 <slot />
