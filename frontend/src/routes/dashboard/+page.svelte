@@ -92,7 +92,7 @@
 			}
 		};
 
-		setup().then(load_user_entry);
+		setup();
 
 		return () => {
 			if (unsubscribe) {

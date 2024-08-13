@@ -27,6 +27,7 @@
 
     let liked: boolean = false;
     let copied: boolean = false;
+    let disliked : boolean ; false;
     let showCitations: boolean = false;  // New state variable
 
     async function getFile(file_id: string) {
@@ -52,6 +53,10 @@
 
     function likeMessage() {
         liked = !liked;
+    }
+
+    function dislikeMessage(){
+        disliked = !disliked;
     }
 
     async function copyToClipboard() {
@@ -117,6 +122,15 @@
                                 class:fill-current={liked} class:text-blue-500={liked} />
                         </svg>
                     </button>
+                
+                    <button on:click={dislikeMessage} 
+                            class="text-gray-400 hover:text-red-500 transition-colors duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M18 9.5a1.5 1.5 0 11-3 0v-6a1.5 1.5 0 013 0v6zM14 9.667v-5.43a2 2 0 00-1.106-1.79l-.05-.025A4 4 0 0011.057 2H5.643A2 2 0 003.68 3.608l-1.2 6A2 2 0 004.44 12H8v4a2 2 0 002 2 1 1 0 001-1v-.667a4 4 0 01.8-2.4l1.4-1.866a4 4 0 00.8-2.4z" 
+                                class:fill-current={disliked} class:text-red-500={disliked} />
+                        </svg>
+                    </button>
+                
                     <button on:click={copyToClipboard} 
                             class="text-gray-400 hover:text-green-500 transition-colors duration-200">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
