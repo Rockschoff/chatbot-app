@@ -153,10 +153,14 @@
 				}
 				if (event.event === 'thread.message.delta') {
 					// const lastMessage = messageContentList[messageContentList.length - 1];
-					messageContentList[messageContentList.length - 1].messageText +=
-						event.data.delta.content[0].text.value;
-					if (event.data.delta.content[0].text.annotations?.length > 0) {
-						event.data.delta.content[0].text.annotations.forEach((ele) => {
+					console.log(event.data.delta.content[0].text)
+					if (!event.data.delta.content[0].text.annotations || event.data.delta.content[0].text.annotations?.length == 0) {
+						messageContentList[messageContentList.length - 1].messageText += event.data.delta.content[0].text.value;
+								
+					}else if(event.data.delta.content[0].text.annotations?.length > 0){
+						console.log(event.data.delta.content[0].text)
+						messageContentList[messageContentList.length - 1].messageText += ` [\[ref\]](./dashboard/${event.data.delta.content[0].text.annotations[0].file_citation.file_id}) `
+						event.data.delta.content[0].text.annotations.forEach((ele:any) => {
 							if (ele?.file_citation) {
 								const ref: citation = {
 									file_id: ele.file_citation.file_id,
@@ -209,9 +213,12 @@
 				}
 				if (event.event === 'thread.message.delta') {
 					// const lastMessage = messageContentList[messageContentList.length - 1];
-					messageContentList[messageContentList.length - 1].messageText +=
-						event.data.delta.content[0].text.value;
-					if (event.data.delta.content[0].text.annotations?.length > 0) {
+					console.log(event.data.delta.content[0].text)
+					if (!event.data.delta.content[0].text.annotations || event.data.delta.content[0].text.annotations?.length == 0) {
+						messageContentList[messageContentList.length - 1].messageText += event.data.delta.content[0].text.value;
+					}else if(event.data.delta.content[0].text.annotations?.length > 0){
+						console.log("got annotations" , event.data.delta.content[0].text)
+						messageContentList[messageContentList.length - 1].messageText += ` [\[ref\]](./dashboard/${event.data.delta.content[0].text.annotations[0].file_citation.file_id}) `
 						event.data.delta.content[0].text.annotations.forEach((ele) => {
 							if (ele?.file_citation) {
 								const ref: citation = {

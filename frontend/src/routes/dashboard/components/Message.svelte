@@ -1,59 +1,60 @@
 <script lang="ts">
-	// import data from '../../../lib/data';
-	interface citation {
-		file_id: string;
-		text: string;
-		start_index: number | null;
-		end_index: number | null;
-	}
-	import { onMount, afterUpdate } from 'svelte';
-	import { marked } from 'marked';
-	import CitationText from './CitationText.svelte';
-	import { fade } from 'svelte/transition';
-    import {goto} from "$app/navigation";
+    // import data from '../../../lib/data';
+    interface citation {
+        file_id: string;
+        text: string;
+        start_index: number | null;
+        end_index: number | null;
+    }
+    import { onMount, afterUpdate } from 'svelte';
+    import { marked } from 'marked';
+    import CitationText from './CitationText.svelte';
+    import { fade } from 'svelte/transition';
+    import { goto } from "$app/navigation";
 
-	import OpenAI from 'openai';
+    import OpenAI from 'openai';
 
-	const openai = new OpenAI({
-		apiKey: import.meta.env.VITE_OPENAI_APIKEY,
-		dangerouslyAllowBrowser: true
-	});
+    const openai = new OpenAI({
+        apiKey: import.meta.env.VITE_OPENAI_APIKEY,
+        dangerouslyAllowBrowser: true
+    });
 
-	export let profilePicUrl;
-	export let senderName;
-	export let messageTime;
-	export let messageText;
-	export let citationList: citation[] = [];
+    export let profilePicUrl;
+    export let senderName;
+    export let messageTime;
+    export let messageText;
+    export let citationList: citation[] = [];
 
-	let liked : boolean = false;
-	let copied: boolean = false
+    let liked: boolean = false;
+    let copied: boolean = false;
+    let showCitations: boolean = false;  // New state variable
 
-	async function getFile(file_id: string) {
-		if (!file_id) {
-			console.log('file not found');
-		}
-		console.log('calling the api');
-		const file = await openai.files.retrieve(file_id);
-		console.log('got the results');
-		console.log(file);
-	}
+    async function getFile(file_id: string) {
+        if (!file_id) {
+            console.log('file not found');
+        }
+        console.log('calling the api');
+        const file = await openai.files.retrieve(file_id);
+        console.log('got the results');
+        console.log(file);
+    }
 
-	marked.setOptions({
-		breaks: true
-	});
-	// Reactive statement to handle no profile picture
-	$: imageUrl = profilePicUrl || 'default-image'; // Use 'default-image' or leave blank
-	$: hasImage = Boolean(profilePicUrl);
+    marked.setOptions({
+        breaks: true
+    });
 
-	// Convert Markdown to HTML
-	$: htmlMessage = marked(messageText || '');
+    // Reactive statement to handle no profile picture
+    $: imageUrl = profilePicUrl || 'default-image'; // Use 'default-image' or leave blank
+    $: hasImage = Boolean(profilePicUrl);
 
+    // Convert Markdown to HTML
+    $: htmlMessage = marked(messageText || '');
 
-	function likeMessage(){
-		liked = !liked
-	}
+    function likeMessage() {
+        liked = !liked;
+    }
 
-	async function copyToClipboard() {
+    async function copyToClipboard() {
         try {
             await navigator.clipboard.writeText(messageText);
             copied = true;
@@ -63,30 +64,28 @@
         }
     }
 
-	function setLinksToOpenInNewTab() {
-    const links = document.querySelectorAll('#message-content a');
-    links.forEach(link => {
-        link.setAttribute('target', '_blank');
-        link.setAttribute('rel', 'noopener noreferrer'); // Security best practice
+    function setLinksToOpenInNewTab() {
+        const links = document.querySelectorAll('#message-content a');
+        links.forEach(link => {
+            link.setAttribute('target', '_blank');
+            link.setAttribute('rel', 'noopener noreferrer'); // Security best practice
 
-        if (link.href.startsWith('https://')) {
-            // console.log('This link is secure:', link.href);
-        } else {
-            // console.log('This link is not secure:', link.href);
-            link.textContent = link.textContent.replace(/%20/g, ' ');
-        }
+            if (link.href.startsWith('https://')) {
+                // console.log('This link is secure:', link.href);
+            } else {
+                // console.log('This link is not secure:', link.href);
+                link.textContent = link.textContent.replace(/%20/g, ' ');
+            }
+        });
+    }
+
+    onMount(() => {
+        setLinksToOpenInNewTab();
     });
-	}
 
-	onMount(() => {
-		setLinksToOpenInNewTab();
-	});
-
-	afterUpdate(()=>{
-		setLinksToOpenInNewTab();
-	})
-
-
+    afterUpdate(() => {
+        setLinksToOpenInNewTab();
+    });
 </script>
 
 <div class="message-box bg-white rounded-lg shadow-sm p-4 mb-4 transition-all duration-300 hover:shadow-md"
@@ -134,18 +133,24 @@
 
             {#if citationList.length > 0}
                 <div class="mt-3 pt-3 border-t border-gray-200">
-                    <h5 class="text-xs font-semibold text-gray-600 mb-2">Citations:</h5>
-                    {#each citationList as citation, index}
-                        <p class="text-xs text-blue-600 mb-1 hover:underline" on:click={()=>{window.open(`./dashboard/${citation.file_id}`, '_blank')}}>
-                            {index + 1}.) <CitationText file_id={citation.file_id} />
-                        </p>
-                    {/each}
+                    <h5 class="text-xs font-semibold text-gray-600 mb-2 flex items-center cursor-pointer" on:click={() => showCitations = !showCitations}>
+                        Citations:
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor" style:transform={showCitations ? 'rotate(180deg)' : 'rotate(0deg)'}>
+                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 011.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </h5>
+                    {#if showCitations}
+                        {#each citationList as citation, index}
+                            <p class="text-xs text-blue-600 mb-1 hover:underline" on:click={()=>{window.open(`./dashboard/${citation.file_id}`, '_blank')}}>
+                                {index + 1}.) <CitationText file_id={citation.file_id} />
+                            </p>
+                        {/each}
+                    {/if}
                 </div>
             {/if}
         </div>
     </div>
 </div>
-
 
 {#if copied}
     <div class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-full shadow-lg" 
