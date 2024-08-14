@@ -288,7 +288,24 @@
 </script>
 
 <div class="main-container bg-gray-200">
-	<div class="sidemenu bg-gray-700 h-full w-20 flex flex-col justify-between items-center p-5">
+	<div class="mobile-header bg-gray-700 flex justify-between items-center p-3 md:hidden">
+        <div class="flex items-center space-x-4">
+            <svg id="menu-toggle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="w-6 h-6 fill-gray-500" on:click={() => {showSidebar = !showSidebar}}>
+                <path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/>
+            </svg>
+            <span class="text-gray-300 font-semibold">Chat App</span>
+        </div>
+        <div class="flex items-center space-x-4">
+            <svg id="new-chat-mobile" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="w-6 h-6 fill-gray-500" on:click={() => handleNewChat({detail:{retrieval : false}})}>
+                <path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM232 344l0-64-64 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l64 0 0-64c0-13.3 10.7-24 24-24s24 10.7 24 24l0 64 64 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-64 0 0 64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"/>
+            </svg>
+            <!-- <svg id="profile-mobile" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="w-6 h-6 fill-gray-500" on:click={() => isGenerating ? null : goto("/dashboard/profile")}>
+                <path d="M304 128a80 80 0 1 0 -160 0 80 80 0 1 0 160 0zM96 128a128 128 0 1 1 256 0A128 128 0 1 1 96 128zM49.3 464l349.5 0c-8.9-63.3-63.3-112-129-112l-91.4 0c-65.7 0-120.1 48.7-129 112zM0 482.3C0 383.8 79.8 304 178.3 304l91.4 0C368.2 304 448 383.8 448 482.3c0 16.4-13.3 29.7-29.7 29.7L29.7 512C13.3 512 0 498.7 0 482.3z"/>
+            </svg> -->
+        </div>
+		<!-- <div class="sidebar {showSidebar?"show":"hidden"}"><Sidebar on:newChat={handleNewChat} {threads} {user_id} {user_entry} {isGenerating} /></div> -->
+    </div>
+	<div class="sidemenu bg-gray-700 h-full w-20 md:flex flex-col justify-between items-center p-5 hidden">
 		<div class="flex flex-col items-center space-y-4">
 			<div class="icon-container flex flex-col items-center">
 				<svg id='profile' xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="w-10 h-10 fill-gray-500 hover:fill-blue-400" on:click={()=>{isGenerating? null :goto("/dashboard/profile")}}>
@@ -317,7 +334,7 @@
 			<span class="icon-label text-gray-500 text-xs">Logout</span>
 		</div>
 	  </div>
-	<div class="sidebar {showSidebar?"show":"hidden"}"><Sidebar on:newChat={handleNewChat} {threads} {user_id} {user_entry} {isGenerating} /></div>
+	<div class="sidebar {showSidebar?"show":"hidden"} bg-gray-800"><Sidebar on:newChat={handleNewChat} {threads} {user_id} {user_entry} {isGenerating} /></div>
 	<div class="chat-window w-full">
 		<Chatbox on:newMessage={handleNewMessage} {threadId} {user_id} {messageContentList} 
 		on:generationStart={generationStart} on:generationStop={generationStop}  />
@@ -326,54 +343,97 @@
 
 <style lang="postcss">
 	.main-container {
+        height: 100vh;
+        width: 100vw;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .mobile-header {
+        position: static;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 10;
+    }
+
+    .sidebar,
+    .chat-window {
+        width: 100%;
+        height: auto;
+    }
+
+    .chat-window {
+        border-radius: 0;
+        margin-top: 56px; /* Height of the mobile header */
+    }
+
+    .sidebar {
+		
+        position:static;
+        top:0px; /* Height of the mobile header */
+        left: 0;
+        bottom: 0;
+        width: 80%;
+        /* max-width: 300px; */
+        /* background-color: white; */
+        z-index: 20;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .sidebar.show {
+        transform: translateX(0);
+    }
+
+    @media (min-width: 768px) {
+        .main-container {
+            flex-direction: row;
+        }
+
+        .mobile-header {
+            display: none;
+        }
+
+        .sidebar {
+            position: static;
+            width: 25%;
+            transform: none;
+            transition: none;
+        }
+
+        .chat-window {
+            background-color: #fdf6ed;
+            margin-top: 0;
+            border-radius: 20px;
+        }
+
+        .sidemenu {
+            display: flex;
+        }
+    }
+
+	.main-container {
 		height: 90vh;
 		width: 100vw;
 		display: flex;
-		flex-direction: column; /* Stack vertically on small screens */
+		flex-direction: column;
+		overflow-y: scroll;
+		background-color: #fdf6ed; /* Stack vertically on small screens */
 	}
 
 	.sidebar,
 	.chat-window {
 		width: 100%; /* Full width on small screens */
-		height: auto;
+		height: 100%;
 	}
 
 	.chat-window {
 		border-radius: 20px; /* Smaller radius on smaller screens */
 	}
 
-	/* Tooltip styles */
-	[aria-label] {
-		position: relative;
-		cursor: pointer;
-	}
 
-	[aria-label]::after {
-		content: attr(aria-label);
-		position: absolute;
-		left: 100%;
-		top: 50%;
-		transform: translateY(-50%);
-		background-color: rgba(0, 0, 0, 0.8);
-		color: white;
-		padding: 4px 8px;
-		border-radius: 4px;
-		font-size: 12px;
-		white-space: nowrap;
-		opacity: 0;
-		visibility: hidden;
-		transition: opacity 0.3s, visibility 0.3s;
-		z-index: 10;
-	}
-
-	[aria-label]:hover::after {
-		opacity: 1;
-		visibility: visible;
-	}
-
-	.sidemenu {
-		z-index: 5;
-	}
+	
 
 
 	@media (min-width: 768px) {
@@ -397,7 +457,8 @@
 
 	@media (max-width: 767px) {
 		.sidebar {
-			display: none; /* Hide sidebar on smaller screens */
+			 /* Hide sidebar on smaller screens */
+			
 		}
 
 		.chat-window {

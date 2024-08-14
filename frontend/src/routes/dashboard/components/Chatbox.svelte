@@ -298,24 +298,26 @@
 			isActive = false;
 			}
 	}
+
+	let isMobileInputExpanded = false;
 </script>
 
-<div class="flex flex-col h-full w-full justify-between p-4">
-	<div class="message-container p-3 space-y-4 relative w-full h-full">
+<div class="flex flex-col h-full w-full justify-between p-2 md:p-4">
+	<div class="message-container p-2 md:p-3 space-y-4 relative w-full h-full mb-16 md:mb-0">
 		{#each messageContentList as message}
 			<Message {...message} {threadId} userId={user_id}/>
 		{/each}
 	</div>
 
-	<div id="input-area" class="input-area transiton duration-300  border {isActive ? "bg-white" :"bg-transparent  border-gray-400"} w-full rounded-lg " on:click={toggleIsActive}>
-		<div class="flex flex-row items-center space-x-2 p-2">
-		  <div class="relative flex-grow" aria-label="text-box">
-			<input
-			  placeholder="Type your message here"
-			  class="form-input w-full py-2 px-4 pr-24 rounded-lg border-none focus:outline-none  {isLoading ? "bg-gray-100": "bg-transparent"}"
-			  bind:value={messageInput}
-			  on:keypress={handleEnterPress}
-			  disabled={isLoading}
+	<div id="input-area" class="input-area fixed bottom-0 left-0 right-0 md:relative bg-white md:bg-transparent transition duration-300 border {isActive ? "border-blue-500" : "border-gray-400"} w-full rounded-t-lg md:rounded-lg shadow-lg md:shadow-none" on:click={toggleIsActive}>
+		<div class="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-2 p-2">
+			<div class="relative flex-grow w-full">
+				<input
+				placeholder="Type your message here"
+				class="form-input w-full py-2 px-4 pr-24 rounded-lg border-none focus:outline-none {isLoading ? "bg-gray-100": "bg-transparent"}"
+				bind:value={messageInput}
+				on:keypress={handleEnterPress}
+				disabled={isLoading}
 			/>
 			<div class="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
 			  <button class="text-gray-500 hover:text-blue-500 focus:outline-none" on:click={toggleFileUpload}>
@@ -417,4 +419,22 @@
 		max-height: 2.5rem;
 		overflow-y: auto;
 	}
+
+	@media (max-width: 768px) {
+        .message-container {
+            padding-bottom: 80px; /* Adjust based on your input area height */
+        }
+
+        .input-area {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 40;
+            padding: 10px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        }
+    }
+
+	
 </style>
