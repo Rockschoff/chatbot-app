@@ -171,6 +171,13 @@ const funcs = {
     "Search_CFR_Title_21" : Search_CFR_Title_21
 }
 
+function getCurrentDateTime() {
+    const now = new Date();
+    const date = now.toLocaleDateString('en-US');
+    const time = now.toLocaleTimeString('en-US');
+    return `${date} ${time}`;
+}
+
 export async function getThreadName(text : string): Promise<string> {
     const systemMessage = `You are a thread name generator, the user will give a text that is the first message of the thread using that text generate a 
     3-5 word long  name for the thread. Return only the name and nothing else. Example , user : 'what is significance of FSVP in Japan'; assistant : 'About FSVP in Japan'`
@@ -180,7 +187,7 @@ export async function getThreadName(text : string): Promise<string> {
             messages : [{role : "system" , content : systemMessage},
             {role : "user" , content : text}]
         })
-        return reponse.choices[0].message.content?reponse.choices[0].message.content:text.substring(0,15)+"..."
+        return reponse.choices[0].message.content?reponse.choices[0].message.content+"%"+getCurrentDateTime():text.substring(0,15)+"..."
     }catch(err){
 
         console.error("Error genrating the name of the thread" , err)

@@ -9,6 +9,7 @@
     import { onMount, afterUpdate } from 'svelte';
     import { marked } from 'marked';
     import CitationText from './CitationText.svelte';
+    import  LoadingMessage from "./LoadingMessage.svelte"
     import { fade } from 'svelte/transition';
     import { goto } from "$app/navigation";
 
@@ -19,16 +20,26 @@
         dangerouslyAllowBrowser: true
     });
 
-    export let profilePicUrl;
-    export let senderName;
-    export let messageTime;
-    export let messageText;
+    export let messageId : string
+    export let profilePicUrl : string;
+    export let senderName : string;
+    export let messageTime : string;
+    export let messageText : string;
     export let citationList: citation[] = [];
+    export let metadata :  {liked : boolean ; disliked : boolean ; comment : string};
+    export let threadId : string;
+    export let userId : string;
 
-    let liked: boolean = false;
-    let copied: boolean = false;
-    let disliked : boolean ; false;
+    let liked: boolean = metadata.liked
+    let copied: boolean= false
+    let disliked : boolean = metadata.disliked
+    let comment : string = metadata.comment
     let showCitations: boolean = false;  // New state variable
+
+    const backendURL = import.meta.env.VITE_BACKEND_URL
+
+    let commentText = comment;
+    let showCommentModal = false;
 
     async function getFile(file_id: string) {
         if (!file_id) {
@@ -51,12 +62,62 @@
     // Convert Markdown to HTML
     $: htmlMessage = marked(messageText || '');
 
-    function likeMessage() {
-        liked = !liked;
+    async function likeMessage() {
+        liked = !liked
+        const success = await updateMetaData({"liked" : liked , "disliked" : disliked , "comment" : comment})
+        if(!success){
+            liked = !liked
+        }
     }
 
-    function dislikeMessage(){
-        disliked = !disliked;
+    async function dislikeMessage(){
+        disliked = !disliked
+        const success = await updateMetaData({"liked" : liked , "disliked" : disliked , "comment" : comment})
+        if(!success){
+            disliked = !disliked
+        }
+    }
+
+    async function addComment(text : string){
+        comment = text
+        const success = await updateMetaData({"liked" : liked , "disliked" : disliked , "comment" : comment})
+        if(!success){
+            comment = metadata.comment
+        }
+    }
+
+    async function updateMetaData(metadata : {liked : boolean , disliked : boolean , comment : string }){
+        // console.log({
+        //             user_id : userId,
+        //             thread_id : threadId,
+        //             message_id : messageId,
+        //             metadata : metadata
+                    
+        //         })
+        try{
+            const reponse = await fetch(backendURL+"/add-message-metadata" , {
+                method : "POST",
+                headers : {"Content-Type" : "application/json"},
+                body : JSON.stringify({
+                    user_id : userId,
+                    thread_id : threadId,
+                    message_id : messageId,
+                    metadata : metadata
+                    
+                })
+            })
+
+            if(!reponse.ok){
+                console.error("Error ocurred in updating the message meatdata" , reponse)
+                return false
+            }
+
+            return true
+        
+        }catch(err){
+            console.error("Error ocurred in updating the message meatdata" , err)
+            return false
+        }
     }
 
     async function copyToClipboard() {
@@ -82,6 +143,20 @@
                 link.textContent = link.textContent.replace(/%20/g, ' ');
             }
         });
+    }
+
+    function openCommentModal() {
+        showCommentModal = true;
+        commentText = comment; // Set the initial value to the current comment
+    }
+
+    function closeCommentModal() {
+        showCommentModal = false;
+    }
+
+    function submitComment() {
+        addComment(commentText);
+        closeCommentModal();
     }
 
     onMount(() => {
@@ -138,11 +213,22 @@
                             <path d="M3 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v6h-4.586l1.293-1.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L10.414 13H15v3a2 2 0 01-2 2H5a2 2 0 01-2-2V5zM15 11h2a1 1 0 110 2h-2v-2z" />
                         </svg>
                     </button>
+
+                    <button on:click={openCommentModal} 
+                            class="text-gray-400 hover:text-purple-500 transition-colors duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
                 </div>
             </div>
             
             <div id="message-content" class="prose prose-sm max-w-none text-gray-700">
-                {@html htmlMessage}
+                {#if htmlMessage}
+                    {@html htmlMessage}
+                {:else}
+                    <LoadingMessage/>
+                {/if}
             </div>
 
             {#if citationList.length > 0}
@@ -165,6 +251,27 @@
         </div>
     </div>
 </div>
+
+{#if showCommentModal}
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
+            <h3 class="text-lg font-semibold mb-4">Add Comment</h3>
+            <textarea
+                bind:value={commentText}
+                class="w-full h-32 p-2 border rounded-md mb-4"
+                placeholder="Enter your comment here..."
+            ></textarea>
+            <div class="flex justify-end space-x-2">
+                <button on:click={closeCommentModal} class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">
+                    Cancel
+                </button>
+                <button on:click={submitComment} class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                    Submit
+                </button>
+            </div>
+        </div>
+    </div>
+{/if}
 
 {#if copied}
     <div class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-full shadow-lg" 

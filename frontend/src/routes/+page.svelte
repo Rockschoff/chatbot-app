@@ -193,7 +193,7 @@
 
     <!-- Title and Description -->
     <div class="text-center mb-16 relative z-10">
-        <h2 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">IN-Q Knowledge Center</h2>
+        <h2 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2 heading-font">IN-Q Knowledge Center</h2>
         <p class="text-lg md:text-xl text-gray-600 mt-2">
             Your compliance companion. Expert-validated and tested.
         </p>

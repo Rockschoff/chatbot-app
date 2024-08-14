@@ -4,17 +4,19 @@
 	import OpenAI from 'openai';
 	import * as pdfjsLib from 'pdfjs-dist';
 	import {slide} from "svelte/transition"
+	import {v4 as uuidv4} from "uuid"
 	// import * as XLSX from 'xlsx';
 	// import Papa from 'papaparse';
 	// import mammoth from 'mammoth';
 	// import JSZip from 'jszip';
 	import getFileText from './fileReader';
 	import getResponse, {GetToolResponse , getThreadName} from "../../../lib/openAICaller"
-	import { faScrollTorah } from '@fortawesome/free-solid-svg-icons';
+	import { faL, faScrollTorah } from '@fortawesome/free-solid-svg-icons';
 
 	const dispatch = createEventDispatcher();
 
 	export let user_id: string;
+	
 
 	interface citation {
 		file_id: string;
@@ -24,11 +26,13 @@
 	}
 
 	interface MessageContent {
+		messageId : string;
 		profilePicUrl: string;
 		senderName: string;
 		messageTime: string;
 		messageText: string;
 		citationList: citation[] | null;
+		metadata : {liked : boolean ; disliked : boolean ; comment : string}
 	}
 
 	let file_text: string = '';
@@ -36,9 +40,9 @@
 	let files: File[] = [];
 	let messageInput = '';
 	export let threadId: string | null;
-
 	let isActive : boolean = false;
 	let showFileUpload : boolean = false;
+	let isLoading : boolean = false;
 
 	const openai = new OpenAI({
 		apiKey: import.meta.env.VITE_OPENAI_APIKEY,
@@ -85,11 +89,13 @@
 		}
 		if (messageInput.trim() || file_text) {
 			const newMessage: MessageContent = {
+				messageId : uuidv4(),
 				profilePicUrl: '',
 				senderName: 'Me',
 				messageTime: new Date().toLocaleTimeString(),
 				messageText: messageInput,
-				citationList: []
+				citationList: [],
+				metadata : {liked : false , disliked : false , comment : ""}
 			};
 			messageContentList = [...messageContentList, newMessage];
 			const generated_thread_name =  getThreadName(messageContentList[0].messageText)
@@ -100,11 +106,14 @@
 				thread_name: generated_thread_name,
 				message_content: newMessage
 			});
+			dispatch("generationStart")
 			scrollToBottom();
-
+			isLoading = true
 			console.log("sedningmessage to opneai")
 			await sendToOpenAI(messageInput);
 			console.log("got the message from openai")
+			isLoading = false
+			dispatch("generationStop")
 			dispatch('newMessage', {
 				num_messages: messageContentList.length,
 				user_id: user_id,
@@ -137,11 +146,13 @@
 			
 
 			let botMessage: MessageContent = {
+				messageId: uuidv4(),
 				profilePicUrl: './small_logo.png',
 				senderName: 'In-Q Center',
 				messageTime: new Date().toLocaleTimeString(),
 				messageText: '',
-				citationList: []
+				citationList: [],
+				metadata : {liked : false , disliked : false , comment : ""}
 			};
 			messageContentList = [...messageContentList, botMessage];
 			scrollToBottom()
@@ -292,7 +303,7 @@
 <div class="flex flex-col h-full w-full justify-between p-4">
 	<div class="message-container p-3 space-y-4 relative w-full h-full">
 		{#each messageContentList as message}
-			<Message {...message} />
+			<Message {...message} {threadId} userId={user_id}/>
 		{/each}
 	</div>
 
@@ -301,9 +312,10 @@
 		  <div class="relative flex-grow">
 			<input
 			  placeholder="Type your message here"
-			  class="form-input w-full py-2 px-4 pr-24 rounded-lg border-none focus:outline-none  bg-transparent"
+			  class="form-input w-full py-2 px-4 pr-24 rounded-lg border-none focus:outline-none  {isLoading ? "bg-gray-100": "bg-transparent"}"
 			  bind:value={messageInput}
 			  on:keypress={handleEnterPress}
+			  disabled={isLoading}
 			/>
 			<div class="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
 			  <button class="text-gray-500 hover:text-blue-500 focus:outline-none" on:click={toggleFileUpload}>
@@ -319,6 +331,7 @@
 			  </button>
 			  <button
 				class="text-blue-500 hover:text-blue-700 focus:outline-none"
+				disabled={isLoading}
 				on:click={sendMessage}
 			  >
 				<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

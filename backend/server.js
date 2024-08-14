@@ -4,6 +4,7 @@ const cors = require('cors');
 require('dotenv').config();
 const { connectToDatabase, ...mongodbDAO } = require('./utils/mongodbDAO');
 const {OpenAI} = require('openai')
+const {v4} = require("uuid")
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -109,6 +110,13 @@ app.post('/add-message', async (req, res) => {
     return res.status(400).send('Invalid message content');
   }
 
+  if(!messageContent.messageId){
+    messageContent.messageId = v4();
+  }
+  if(!messageContent.metadata){
+    messageContent.metadata = {liked : false, disliked : false , comments : "" }
+  }
+
   try {
     await mongodbDAO.addMessage(user_id, thread_id, messageContent);
     res.status(200).send('Message added successfully');
@@ -129,6 +137,14 @@ app.post('/load-messages', async (req, res) => {
   try {
     const messages = await mongodbDAO.loadMessages(user_id, thread_id);
     if (messages) {
+      for(var i = 0 ; i < messages.length ; i ++){
+          if(!messages[i].messageId){
+            messages[i].messageId = v4();
+          }
+          if(!messages[i].metadata){
+            messages[i].metadata = {liked : false , disliked : false , comment : ""}
+          }
+        }
       res.status(200).json(messages);
     } else {
       res.status(404).send('Messages not found');
@@ -162,6 +178,33 @@ app.post('/get-user', async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 });
+
+app.post("/add-message-metadata" , async function(req , res){
+  console.log("add-message-metadata")
+  const {user_id , thread_id, message_id , metadata} = req.body;
+
+  if(!user_id || !thread_id || !message_id || !metadata){
+    console.log("needed params user_id , thread_id, message_id , metadata got :"  ,req.body)
+    return res.status(400).send("needed params user_id , thread_id, message_id , metadata got :"  + JSON.stringify(req.body));
+  }
+  // if(!metadata.liked==null || metadata.disliked==null || metadata.comment==null){
+  //   console.log( "Invalid metadata content , needed liked , disliked , comment got :" ,  metadata )
+  //   return res.status(400).send("Invalid metadata content , needed liked , disliked , comment got :"  + JSON.stringify(metadata));
+  // }
+  try{
+
+    const response = await mongodbDAO.addMessageMetadata(user_id , thread_id, message_id , metadata)
+    if(response){
+      return res.status(200).send("Metadata added sucessfully")
+    }else{
+      return res.status(500).send("Could not add the metadata succesfully")
+    }
+    
+  }catch(err){
+    console.log( "Error occurre4d in updating the metadata", err)
+    return res.status(500).send("Internal Server Error" + JSON.stringify(err))
+  }
+})
 
 app.post("/get-repsonse" , async (res , req)=>{
   console.log("get-repsonse")

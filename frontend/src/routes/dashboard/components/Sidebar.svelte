@@ -3,10 +3,12 @@
 	import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons';
 	import { authStore, authHandlers } from '../../../stores/authStore';
 	import { createEventDispatcher, onMount } from 'svelte';
+	import ThreadListElement from './ThreadListElement.svelte';
 
 	export let threads: { thread_id: string; thread_name: string }[];
 	export let user_id: string | null;
 	export let user_entry: any;
+	export let isGenerating:boolean;
 
 	const dispatch = createEventDispatcher();
 
@@ -25,10 +27,16 @@
 	}
 
 	function startNewChat() {
+		if(isGenerating){
+			return
+		}
 		dispatch('newChat', { retrieval: false });
 	}
 
 	function loadMessages(thread_id: string, thread_name: string) {
+		if(isGenerating){
+			return
+		}
 		dispatch('newChat', { thread_id, user_id, thread_name, retrieval: true });
 	}
 
@@ -102,24 +110,9 @@
 		<p class="font-bold  text-xl text-white mb-2">Chat History</p>
 		{#if true}
 			{#each threads.slice().reverse() as thread, index}
-				<div
-					class="w-full flex items-center p-3 bg-gray-700 mb-2 rounded-md shadow hover:bg-gray-600 cursor-pointer transition duration-200"
-				>
-					<p
-						class="text-gray-300 hover-underline flex-grow"
-						on:click={() => {
-							loadMessages(thread.thread_id, thread.thread_name);
-						}}
-					>
-						{index + 1}. {thread.thread_name}
-					</p>
-					<button
-						class="text-red-500 hover:text-red-600 transition duration-200"
-						on:click={() => deleteThread(thread.thread_id, thread.thread_name)}
-					>
-						<FontAwesomeIcon icon={faTimes} />
-					</button>
-				</div>
+				<ThreadListElement thread={thread} index={index}
+					on:deleteThread={(event) => { deleteThread(event.detail.thread_id, event.detail.thread_name) }}
+					on:loadMessages={(event) => { loadMessages(event.detail.thread_id, event.detail.thread_name); }} />
 			{/each}
 		{/if}
 	</div>

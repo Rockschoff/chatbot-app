@@ -51,6 +51,7 @@ const mongodbDAO = {
   async getThreads(user_id) {
     const collection = await getCollection('user_threads', 'threads');
     const user = await collection.findOne({ user_id });
+    // console.log(user.threads)
     return user ? user.threads : null;
   },
 
@@ -136,7 +137,31 @@ const mongodbDAO = {
       { user_id },
       { $set: updates }
     );
-  }
+  },
+
+  async  addMessageMetadata(user_id, thread_id, message_id, metadata) {
+    try {
+        const collection = await getCollection("user_threads", 'messages');
+        const result = await collection.updateOne(
+            { user_id, thread_id },
+            { $set: { "messages.$[msg].metadata": metadata } },
+            { arrayFilters: [{ "msg.messageId": message_id }] }
+        );
+
+        if (result.matchedCount === 0) {
+            throw new Error(`User ID ${user_id} and Thread ID ${thread_id} not found.`);
+        }
+
+        if (result.modifiedCount === 0) {
+            console.warn(`Message ID ${message_id} not found in the thread.`);
+        }
+
+        return true;
+    } catch (err) {
+        throw new Error(`An error occurred while performing the operation: ${err.message}`);
+    }
+}
+
 };
 
 module.exports = {

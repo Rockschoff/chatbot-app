@@ -6,13 +6,15 @@
 	import { auth } from '../../lib/firebase/firebase.client';
 	import {authHandlers} from "../../stores/authStore"
 	import {goto} from "$app/navigation"
-	import {v4 as uuidv4} from "uuid"
+	// import {v4 as uuidv4} from "uuid"
 
 	let user_id: string;
 	let user_name: string | null;
 	let user_entry: any;
 	let threads: { thread_id: string; thread_name: string }[] = [];
 	let showSidebar: boolean = false
+	let isGenerating : boolean = false;
+	
 
 	interface citation {
 		file_id: string;
@@ -22,11 +24,13 @@
 	}
 
 	interface MessageContent {
+		messageId : string;
 		profilePicUrl: string;
 		senderName: string;
 		messageTime: string;
 		messageText: string;
 		citationList: citation[] | null;
+		metadata : {liked : boolean ; disliked : boolean ; comment : string}
 	}
 
 	let messageContentList: MessageContent[] = [];
@@ -36,7 +40,7 @@
 		dangerouslyAllowBrowser: true
 	});
 
-	let threadId: string | null = null;
+	let threadId: string = '';
 
 	function getCurrentDateTime() {
 		const now = new Date();
@@ -115,7 +119,8 @@
 			if (!response.ok) {
 				throw new Error('Failed to fetch threads');
 			}
-
+			
+			threads=[]
 			const data = await response.json();
 			threads = data.length ? data : [];
 		} catch (error) {
@@ -125,8 +130,12 @@
 	}
 
 	async function handleNewChat(event: CustomEvent | {detail : {retrieval : boolean}}) {
+		
 		console.log('handle new chat', event.detail.retrieval);
 		if (!event.detail.retrieval) {
+			if(isGenerating){
+				return
+			}
 			try {
 				const thread = await openai.beta.threads.create();
 				threadId = thread.id;
@@ -150,54 +159,61 @@
 					throw new Error('Failed to load messages');
 				}
 
+				//Set current thread id to the selected thread
+				threadId = event.detail.thread_id
+
+				messageContentList=[]
 				const messages = await loadResponse.json();
+				
 				messageContentList = messages;
+				// messageContentList.map((ele)=>{console.log(ele)})
 
 				// Delete the old thread
-				const deleteResponse = await fetch(`${backendUrl}/delete-thread`, {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({
-						user_id: event.detail.user_id,
-						thread_id: event.detail.thread_id,
-						thread_name: event.detail.thread_name
-					})
-				});
+				// const deleteResponse = await fetch(`${backendUrl}/delete-thread`, {
+				// 	method: 'POST',
+				// 	headers: {
+				// 		'Content-Type': 'application/json'
+				// 	},
+				// 	body: JSON.stringify({
+				// 		user_id: event.detail.user_id,
+				// 		thread_id: event.detail.thread_id,
+				// 		thread_name: event.detail.thread_name
+				// 	})
+				// });
 
-				if (!deleteResponse.ok) {
-					throw new Error('Failed to delete old thread');
-				}
+				// if (!deleteResponse.ok) {
+				// 	throw new Error('Failed to delete old thread');
+				// }
 
-				console.log('Old thread deleted successfully');
+				// console.log('Old thread deleted successfully');
 
 				// Create a new thread with OpenAI
-				const newThread = await openai.beta.threads.create();
-				threadId = newThread.id;
+				// const newThread = await openai.beta.threads.create();
+				// threadId = newThread.id;
 
 				// Add the new thread with the old name
-				await addThread(threadId, event.detail.thread_name);
+				// await addThread(threadId, event.detail.thread_name);
 
 				// Reload threads to reflect changes
 				await loadThreads();
 
-				console.log('New thread created and added successfully:', threadId);
+				// console.log('New thread created and added successfully:', threadId);
 
 				// Add messages to the new thread
-				for (const message of messageContentList) {
-					await handleNewMessage({
-						detail: {
-							user_id: event.detail.user_id,
-							thread_id: threadId,
-							message_content: message,
-							num_messages: messageContentList.length
-						}
-					} as CustomEvent);
-				}
+				// for (const message of messageContentList) {
+				// 	await handleNewMessage({
+				// 		detail: {
+				// 			user_id: event.detail.user_id,
+				// 			thread_id: threadId,
+				// 			message_content: message,
+				// 			num_messages: messageContentList.length
+				// 		}
+				// 	} as CustomEvent);
+				// }
 			} catch (error) {
 				console.error('Error retrieving and recreating chat:', error);
 			}
+			
 		}
 	}
 
@@ -224,12 +240,15 @@
 	async function handleNewMessage(event: CustomEvent) {
 		if (event.detail.num_messages == 1) {
 			const name = await event.detail.thread_name
+			console.log("Got the name" , name)
 			await addThread(
 				threadId,
 				name
 			);
+			console.log("Added the thread")
+			console.log("new thread was added with name : " , name )
 			await loadThreads();
-			console.log('New thread was added');
+			console.log('New thread was added' , threads);
 		}
 
 		try {
@@ -259,21 +278,29 @@
 	async function logout(){
 		await authHandlers.logout()
 	}
+
+	function generationStart(){
+		isGenerating = true;
+	}
+	function generationStop(){
+		isGenerating = false;
+	}
 </script>
 
 <div class="main-container bg-gray-200">
 	<div class="sidemenu bg-gray-700 h-full w-20 flex flex-col justify-between items-center p-5">
 		<div class="flex flex-col items-center space-y-4">
 			<div class="icon-container flex flex-col items-center">
-				<svg id='profile' xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="w-10 h-10 fill-gray-500 hover:fill-blue-400" on:click={()=>{goto("/dashboard/profile")}}>
+				<svg id='profile' xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="w-10 h-10 fill-gray-500 hover:fill-blue-400" on:click={()=>{isGenerating? null :goto("/dashboard/profile")}}>
 					<path d="M304 128a80 80 0 1 0 -160 0 80 80 0 1 0 160 0zM96 128a128 128 0 1 1 256 0A128 128 0 1 1 96 128zM49.3 464l349.5 0c-8.9-63.3-63.3-112-129-112l-91.4 0c-65.7 0-120.1 48.7-129 112zM0 482.3C0 383.8 79.8 304 178.3 304l91.4 0C368.2 304 448 383.8 448 482.3c0 16.4-13.3 29.7-29.7 29.7L29.7 512C13.3 512 0 498.7 0 482.3z"/>
 				</svg>
 				<span class="icon-label text-gray-500 text-xs">Profile</span>
 			</div>
 			<div class="icon-container flex flex-col items-center">
-				<svg id="chat-history" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="w-10 h-10 {showSidebar?"fill-gray-400":"fill-gray-500"} hover:fill-gray-400" on:click={()=>{showSidebar = !showSidebar}}>
-					<path d="M32 32l448 0c17.7 0 32 14.3 32 32l0 32c0 17.7-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96L0 64C0 46.3 14.3 32 32 32zm0 128l448 0 0 256c0 35.3-28.7 64-64 64L96 480c-35.3 0-64-28.7-64-64l0-256zm128 80c0 8.8 7.2 16 16 16l160 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-160 0c-8.8 0-16 7.2-16 16z"/>
-				</svg>
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="w-10 h-10 {showSidebar?'fill-gray-400':'fill-gray-500'} hover:fill-gray-400" on:click={()=>{showSidebar = !showSidebar}}>
+					<!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+					<path d="M121 32C91.6 32 66 52 58.9 80.5L1.9 308.4C.6 313.5 0 318.7 0 323.9L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-92.1c0-5.2-.6-10.4-1.9-15.5l-57-227.9C446 52 420.4 32 391 32L121 32zm0 64l270 0 48 192-51.2 0c-12.1 0-23.2 6.8-28.6 17.7l-14.3 28.6c-5.4 10.8-16.5 17.7-28.6 17.7l-120.4 0c-12.1 0-23.2-6.8-28.6-17.7l-14.3-28.6c-5.4-10.8-16.5-17.7-28.6-17.7L73 288 121 96z"/>
+				</svg>	
 				<span class="icon-label text-gray-500 text-xs">History</span>
 			</div>
 			<div class="icon-container flex flex-col items-center">
@@ -290,9 +317,10 @@
 			<span class="icon-label text-gray-500 text-xs">Logout</span>
 		</div>
 	  </div>
-	<div class="sidebar {showSidebar?"show":"hidden"}"><Sidebar on:newChat={handleNewChat} {threads} {user_id} {user_entry} /></div>
+	<div class="sidebar {showSidebar?"show":"hidden"}"><Sidebar on:newChat={handleNewChat} {threads} {user_id} {user_entry} {isGenerating} /></div>
 	<div class="chat-window w-full">
-		<Chatbox on:newMessage={handleNewMessage} {threadId} {user_id} {messageContentList} />
+		<Chatbox on:newMessage={handleNewMessage} {threadId} {user_id} {messageContentList} 
+		on:generationStart={generationStart} on:generationStop={generationStop}  />
 	</div>
 </div>
 
