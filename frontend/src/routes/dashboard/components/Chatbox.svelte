@@ -309,7 +309,7 @@
 
 	<div id="input-area" class="input-area transiton duration-300  border {isActive ? "bg-white" :"bg-transparent  border-gray-400"} w-full rounded-lg " on:click={toggleIsActive}>
 		<div class="flex flex-row items-center space-x-2 p-2">
-		  <div class="relative flex-grow">
+		  <div class="relative flex-grow" aria-label="text-box">
 			<input
 			  placeholder="Type your message here"
 			  class="form-input w-full py-2 px-4 pr-24 rounded-lg border-none focus:outline-none  {isLoading ? "bg-gray-100": "bg-transparent"}"
