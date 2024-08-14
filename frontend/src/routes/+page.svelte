@@ -195,7 +195,7 @@
     <div class="text-center mb-16 relative z-10">
         <h2 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2 heading-font">IN-Q Knowledge Center</h2>
         <p class="text-lg md:text-xl text-gray-600 mt-2">
-            Your compliance companion. Expert-validated and tested.
+            Your compliance companion. Expert-validated and secure.
         </p>
     </div>
 
@@ -267,13 +267,13 @@
                         bind:checked={acceptedPrivacyPolicy}
                         class="mr-2 h-4 w-4 text-pink-500 focus:ring-pink-300 border-gray-300 rounded-full"
                     >
-                    <span class="text-sm">I accept the 
+                    <span class="text-sm">Accept 
                         <button 
                             type="button" 
                             on:click={openPrivacyPolicyModal}
                             class="text-pink-500 hover:text-pink-600 underline focus:outline-none"
                         >
-                            privacy policy
+                            disclaimer
                         </button>
                     </span>
                 </label>

@@ -74,7 +74,7 @@
 {#if $page.url.pathname !== '/'} <!-- Check if the current path is not root -->
 	<div class="navbar">
 		<img class="logo" src="./logo.png" alt="company logo" />
-		<h1 class="heading-font center-heading">IN-Q compliance knowledge center</h1>
+		<h1 class="heading-font center-heading">IN-Q knowledge center</h1>
 		<div class="relative" on:click={toggleToolTip}>
 			<FontAwesomeIcon icon={faInfoCircle} class="info-icon" />
 		</div>

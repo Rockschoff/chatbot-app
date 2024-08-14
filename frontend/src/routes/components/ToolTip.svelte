@@ -25,7 +25,7 @@
 	  </span>
   
 	  <div class="text-lg lg:text-xl font-semibold mb-3 text-gray-800">
-		IN-Q COMPLIANCE KNOWLEDGE CENTER
+		IN-Q KNOWLEDGE CENTER
 	  </div>
   
 	  <p class="mb-2 text-gray-600 leading-relaxed">
@@ -33,9 +33,9 @@
 		<br />
 		<br />
 		<strong class="text-gray-800">Guidance on Regulations</strong>: the tool can help interpret and explain specific FDA regulations and guidelines, citing original documents.<br />
-		<strong class="text-gray-800">Document Review</strong>: the tool can review compliance documents or regulatory filings to ensure they meet FDA standards.<br />
+		<strong class="text-gray-800">Document Comparision and Updates</strong>: the tool can review compliance documents and compare them with the most recent FDA standards.<br />
 		<strong class="text-gray-800">Information Retrieval</strong>: If you need specific information from a large document, the tool can quickly search and find relevant sections.<br />
-		<strong class="text-gray-800">Drafting Assistance</strong>: the tool can assist in drafting compliance documents, ensuring they adhere to regulatory requirements.<br />
+		<strong class="text-gray-800">Drafting Assistance</strong>: the tool can assist in drafting compliance documents or email.<br />
 		<strong class="text-gray-800">Translation into 20 languages</strong>: interaction within this tool can be done in 20 main languages.<br />
 		<br />
 		To get started, you can ask the tool a specific question, and the tool will use the FDA's compliance framework to provide accurate and relevant answers. If your question falls outside the scope of the documents, it will let you know.<br />
