@@ -210,6 +210,9 @@
 				// 		}
 				// 	} as CustomEvent);
 				// }
+				if(window.innerWidth < 768){
+					showSidebar=false
+				}
 			} catch (error) {
 				console.error('Error retrieving and recreating chat:', error);
 			}
