@@ -300,7 +300,7 @@
 {#if showPrivacyPolicyModal}
     <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white p-6 sm:p-8 rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto shadow-lg">
-            <h2 class="text-2xl sm:text-3xl font-bold mb-4 text-gray-800">Privacy Policy</h2>
+            <h2 class="text-2xl sm:text-3xl font-bold mb-4 text-gray-800">Disclaimer</h2>
             <div class="mb-6 text-gray-600 text-sm">
                 <!-- Add your privacy policy content here -->
                 <h1 class="text-2xl font-bold mb-4">Disclaimer</h1>

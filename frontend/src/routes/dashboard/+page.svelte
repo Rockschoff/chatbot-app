@@ -166,7 +166,10 @@
 				const messages = await loadResponse.json();
 				
 				messageContentList = messages;
-				messageContentList.map((ele)=>{console.log(ele)})
+				// for (let i = 0; i < messages.length; i++) {
+				// 	messageContentList.push(messages[i]);
+				// }
+				// messageContentList.map((ele)=>{console.log(ele)})
 
 				// Delete the old thread
 				// const deleteResponse = await fetch(`${backendUrl}/delete-thread`, {
