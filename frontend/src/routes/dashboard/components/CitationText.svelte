@@ -19,4 +19,4 @@
 	});
 </script>
 
-{citationText}
+<p id="link to source document">{citationText}</p>

@@ -302,7 +302,7 @@
 	let isMobileInputExpanded = false;
 </script>
 
-<div class="flex flex-col h-full w-full justify-between p-2 md:p-4">
+<div class="flex flex-col h-full w-full justify-between p-0 md:p-4">
 	<div class="message-container p-2 md:p-3 space-y-4 relative w-full h-full mb-16 md:mb-0">
 		{#each messageContentList as message}
 			<Message {...message} {threadId} userId={user_id}/>
@@ -318,9 +318,10 @@
 				bind:value={messageInput}
 				on:keypress={handleEnterPress}
 				disabled={isLoading}
+				id="Enter message here"
 			/>
 			<div class="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
-			  <button class="text-gray-500 hover:text-blue-500 focus:outline-none" on:click={toggleFileUpload}>
+			  <button class="text-gray-500 hover:text-blue-500 focus:outline-none" on:click={toggleFileUpload} title="View Attachments" >
 				{#if showFileUpload}
 						<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -335,6 +336,8 @@
 				class="text-blue-500 hover:text-blue-700 focus:outline-none"
 				disabled={isLoading}
 				on:click={sendMessage}
+				id="send-message"
+				title="Send Message"
 			  >
 				<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 				  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -355,7 +358,7 @@
 				{#each files as file, index}
 				  <div class="flex items-center justify-between bg-white p-1 rounded">
 					<span class="text-sm truncate">{file.name}</span>
-					<button on:click={() => removeFile(index)} class="text-red-500 ml-2 focus:outline-none">
+					<button on:click={() => removeFile(index)} class="text-red-500 ml-2 focus:outline-none"  title="Remove File">
 					  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
 					  </svg>

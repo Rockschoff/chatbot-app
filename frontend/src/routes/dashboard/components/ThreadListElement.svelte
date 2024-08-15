@@ -37,6 +37,8 @@
     <button
         class="text-red-500 hover:text-red-600 transition duration-200"
         on:click={() => {dispatch("deleteThread" ,  {thread_id : thread.thread_id ,thread_name : thread.thread_name})}}
+        title="Delete Thread"
+        id="delete-thread"
     >
         <FontAwesomeIcon icon={faTimes} />
     </button>

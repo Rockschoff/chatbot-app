@@ -192,31 +192,31 @@
                 <div class="flex space-x-2">
                     <button on:click={likeMessage} 
                             class="text-gray-400 hover:text-blue-500 transition-colors duration-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <svg id="upvote-message" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" 
                                 class:fill-current={liked} class:text-blue-500={liked} />
                         </svg>
                     </button>
                 
                     <button on:click={dislikeMessage} 
-                            class="text-gray-400 hover:text-red-500 transition-colors duration-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            class="text-gray-400 hover:text-red-500 transition-colors duration-200" >
+                        <svg  id="downvote-message" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" >
                             <path d="M18 9.5a1.5 1.5 0 11-3 0v-6a1.5 1.5 0 013 0v6zM14 9.667v-5.43a2 2 0 00-1.106-1.79l-.05-.025A4 4 0 0011.057 2H5.643A2 2 0 003.68 3.608l-1.2 6A2 2 0 004.44 12H8v4a2 2 0 002 2 1 1 0 001-1v-.667a4 4 0 01.8-2.4l1.4-1.866a4 4 0 00.8-2.4z" 
                                 class:fill-current={disliked} class:text-red-500={disliked} />
                         </svg>
                     </button>
                 
                     <button on:click={copyToClipboard} 
-                            class="text-gray-400 hover:text-green-500 transition-colors duration-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            class="text-gray-400 hover:text-green-500 transition-colors duration-200" >
+                        <svg id="copy-to-clipboard" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M8 2a1 1 0 000 2h2a1 1 0 100-2H8z" />
                             <path d="M3 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v6h-4.586l1.293-1.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L10.414 13H15v3a2 2 0 01-2 2H5a2 2 0 01-2-2V5zM15 11h2a1 1 0 110 2h-2v-2z" />
                         </svg>
                     </button>
 
                     <button on:click={openCommentModal} 
-                            class="text-gray-400 hover:text-purple-500 transition-colors duration-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            class="text-gray-400 hover:text-purple-500 transition-colors duration-200" >
+                        <svg id="add-comment" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd" />
                         </svg>
                     </button>
@@ -235,7 +235,7 @@
                 <div class="mt-3 pt-3 border-t border-gray-200">
                     <h5 class="text-xs font-semibold text-gray-600 mb-2 flex items-center cursor-pointer" on:click={() => showCitations = !showCitations}>
                         Citations:
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor" style:transform={showCitations ? 'rotate(180deg)' : 'rotate(0deg)'}>
+                        <svg id="show-citations" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor" style:transform={showCitations ? 'rotate(180deg)' : 'rotate(0deg)'}>
                             <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 011.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                         </svg>
                     </h5>
