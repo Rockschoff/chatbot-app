@@ -51,6 +51,9 @@
 	async function handleEnterPress(event) {
 		if (event.key === 'Enter') sendMessage();
 	}
+	function isSafari() {
+		return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+	}
 
 	function scrollToBottom() {
 		requestAnimationFrame(() => {
@@ -98,7 +101,7 @@
 				metadata : {liked : false , disliked : false , comment : ""}
 			};
 			messageContentList = [...messageContentList, newMessage];
-			const generated_thread_name =  getThreadName(messageContentList[0].messageText)
+			const generated_thread_name =  getThreadName(isSafari()?messageContentList[1].messageText:messageContentList[0].messageText)
 			dispatch('newMessage', {
 				num_messages: messageContentList.length,
 				user_id: user_id,
@@ -321,7 +324,7 @@
 				id="Enter message here"
 			/>
 			<div class="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
-			  <button class="text-gray-500 hover:text-blue-500 focus:outline-none" on:click={toggleFileUpload} title="View Attachments" >
+			  <button class="text-gray-500 hover:text-blue-500 focus:outline-none" on:click={toggleFileUpload} title="Add Attachments" >
 				{#if showFileUpload}
 						<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />

@@ -33,7 +33,17 @@
 		metadata : {liked : boolean ; disliked : boolean ; comment : string}
 	}
 
-	let messageContentList: MessageContent[] = [];
+	const welcomeMessage : MessageContent={
+		messageId : "000x",
+		profilePicUrl: "./small_logo.png",
+		senderName: "IN-Q Center",
+		messageTime: getCurrentDateTime(),
+		messageText: "Hi, How can I help you?",
+		citationList: [],
+		metadata : {liked : false , disliked : false , comment : ""}
+	}
+
+	let messageContentList: MessageContent[] = isSafari()? [welcomeMessage] :[];
 
 	const openai = new OpenAI({
 		apiKey: import.meta.env.VITE_OPENAI_APIKEY,
@@ -47,6 +57,9 @@
 		const date = now.toLocaleDateString('en-US');
 		const time = now.toLocaleTimeString('en-US');
 		return `${date} ${time}`;
+	}
+	function isSafari() {
+		return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 	}
 
 	const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -139,7 +152,7 @@
 			try {
 				const thread = await openai.beta.threads.create();
 				threadId = thread.id;
-				messageContentList = [];
+				messageContentList = isSafari()?[welcomeMessage]:[];
 			} catch (error) {
 				console.error('Error creating new chat:', error);
 			}
@@ -244,7 +257,7 @@
 	}
 
 	async function handleNewMessage(event: CustomEvent) {
-		if (event.detail.num_messages == 1) {
+		if ((event.detail.num_messages == 1 && !isSafari()) || (event.detail.num_messages == 2 && isSafari())) {
 			const name = await event.detail.thread_name
 			console.log("Got the name" , name)
 			await addThread(
