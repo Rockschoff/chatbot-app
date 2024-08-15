@@ -77,7 +77,7 @@
 			}
 
 			// Remove the deleted thread from the threads array
-			threads = threads.filter((thread) => thread.thread_id !== thread_id);
+			threads = [...threads.filter((thread) => thread.thread_id !== thread_id)];
 		} catch (error) {
 			console.error('Error deleting thread:', error);
 		}
@@ -109,7 +109,7 @@
     <div class="chat-history flex-grow flex flex-col w-full bg-gray-800 p-2 sm:p-4 overflow-y-auto">
         <p class="font-bold text-lg sm:text-xl text-white mb-2">Chat History</p>
         {#if true}
-            {#each threads.slice().reverse() as thread, index}
+            {#each threads.slice().reverse() as thread, index (thread.thread_id)}
                 <ThreadListElement thread={thread} index={index}
                     on:deleteThread={(event) => { deleteThread(event.detail.thread_id, event.detail.thread_name) }}
                     on:loadMessages={(event) => { loadMessages(event.detail.thread_id, event.detail.thread_name); }} />
