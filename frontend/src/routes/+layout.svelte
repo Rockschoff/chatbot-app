@@ -72,16 +72,15 @@
 </script>
 
 {#if $page.url.pathname !== '/'} <!-- Check if the current path is not root -->
-	<div class="navbar">
-		<img class="logo" src="./logo.png" alt="company logo" />
-		<h1 class="heading-font center-heading">IN-Q knowledge center</h1>
-		<div class="relative" on:click={toggleToolTip}>
-			<FontAwesomeIcon icon={faInfoCircle} class="info-icon" />
-		</div>
-	</div>
-
-	{#if tooltipVisible}
-		<ToolTip on:closeToolTip={() => (tooltipVisible = false)} />
-	{/if}
+  <div class="navbar flex flex-col sm:flex-row items-center justify-between p-4">
+    <img class="logo w-24 h-auto mb-2 sm:mb-0" src="./logo.png" alt="company logo" />
+    <h1 class="heading-font text-center text-xl sm:text-2xl md:text-3xl font-bold max-w-full">IN-Q knowledge center</h1>
+    <div class="relative mt-2 sm:mt-0" on:click={toggleToolTip}>
+      <FontAwesomeIcon icon={faInfoCircle} class="info-icon text-2xl" />
+    </div>
+  </div>
+  {#if tooltipVisible}
+    <ToolTip on:closeToolTip={() => (tooltipVisible = false)} />
+  {/if}
 {/if}
 <slot />

@@ -188,29 +188,29 @@
 <div class="min-h-screen bg-[#fdf6ed] bg-opacity-80 flex flex-col items-center justify-center p-4 md:p-8 relative">
     <!-- Logo Section -->
     <div class="text-center mb-4 relative z-10">
-        <img src="./logo.png" alt="IN-Q Logo" class="mx-auto w-auto h-24 md:w-auto md:h-32">
+        <img src="./logo.png" alt="IN-Q Logo" class="mx-auto w-auto h-16 sm:h-24 md:h-32">
     </div>
 
     <!-- Title and Description -->
-    <div class="text-center mb-16 relative z-10">
-        <h2 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2 heading-font">IN-Q Knowledge Center</h2>
-        <p class="text-lg md:text-xl text-gray-600 mt-2">
+    <div class="text-center mb-8 sm:mb-16 relative z-10 px-4">
+        <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800 mb-2 heading-font">IN-Q Knowledge Center</h2>
+        <p class="text-base sm:text-lg md:text-xl text-gray-600 mt-2">
             Your compliance companion. Expert-validated and secure.
         </p>
     </div>
 
     <!-- Input Form -->
-    <div class="bg-white bg-opacity-90 backdrop-filter backdrop-blur-lg p-8 rounded-2xl shadow-xl max-w-md w-full relative z-10 transform transition-all duration-300 hover:scale-105 -mt-6">
-        <h1 class="text-3xl font-bold mb-6 text-gray-800">
+    <div class="bg-white bg-opacity-90 backdrop-filter backdrop-blur-lg p-6 sm:p-8 rounded-2xl shadow-xl max-w-md w-full relative z-10 transform transition-all duration-300 hover:scale-105 -mt-4 sm:-mt-6">
+        <h1 class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-gray-800">
             {isCreatingAccount ? 'Create Account' : 'Login'}
         </h1>
 
-        <form on:submit|preventDefault={handleSubmit} class="space-y-6">
+        <form on:submit|preventDefault={handleSubmit} class="space-y-4 sm:space-y-6">
             {#if isCreatingAccount}
                 <div>
                     <label class="block text-gray-700 text-sm font-semibold mb-2" for="fname">First Name</label>
                     <input
-                        class="w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-200"
+                        class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-200"
                         id="fname"
                         type="text"
                         bind:value={fname}
@@ -220,7 +220,7 @@
                 <div>
                     <label class="block text-gray-700 text-sm font-semibold mb-2" for="lname">Last Name</label>
                     <input
-                        class="w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-200"
+                        class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-200"
                         id="lname"
                         type="text"
                         bind:value={lname}
@@ -231,7 +231,7 @@
             <div>
                 <label class="block text-gray-700 text-sm font-semibold mb-2" for="email">Email</label>
                 <input
-                    class="w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-200"
+                    class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-200"
                     id="email"
                     type="email"
                     bind:value={email}
@@ -241,7 +241,7 @@
             <div>
                 <label class="block text-gray-700 text-sm font-semibold mb-2" for="password">Password</label>
                 <input
-                    class="w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-200"
+                    class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-200"
                     id="password"
                     type="password"
                     bind:value={password}
@@ -252,7 +252,7 @@
                 <div>
                     <label class="block text-gray-700 text-sm font-semibold mb-2" for="confirmPassword">Confirm Password</label>
                     <input
-                        class="w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-200"
+                        class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-200"
                         id="confirmPassword"
                         type="password"
                         bind:value={confirmPassword}
@@ -278,16 +278,16 @@
                     </span>
                 </label>
             </div>
-            <div class="flex items-center justify-between pt-4">
+            <div class="flex flex-col sm:flex-row items-center justify-between pt-4">
                 <button
-                    class="text-pink-500 hover:text-pink-600 text-sm font-semibold focus:outline-none transition-colors duration-200"
+                    class="text-pink-500 hover:text-pink-600 text-sm font-semibold focus:outline-none transition-colors duration-200 mb-4 sm:mb-0"
                     type="button"
                     on:click={toggleAccountCreation}
                 >
                     {isCreatingAccount ? 'Already have an account?' : 'Create an account'}
                 </button>
                 <button
-                    class="bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 hover:from-pink-500 hover:to-pink-700 text-white font-bold py-2 px-6 rounded-full shadow-md transform hover:scale-105 transition-all duration-300"
+                    class="bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 hover:from-pink-500 hover:to-pink-700 text-white font-bold py-2 px-6 rounded-full shadow-md transform hover:scale-105 transition-all duration-300 w-full sm:w-auto"
                     type="submit"
                 >
                     {isCreatingAccount ? 'Register' : 'Login'}
@@ -299,22 +299,21 @@
 
 {#if showPrivacyPolicyModal}
     <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white p-8 rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto shadow-lg">
-            <h2 class="text-3xl font-bold mb-4 text-gray-800">Privacy Policy</h2>
+        <div class="bg-white p-6 sm:p-8 rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto shadow-lg">
+            <h2 class="text-2xl sm:text-3xl font-bold mb-4 text-gray-800">Privacy Policy</h2>
             <div class="mb-6 text-gray-600">
                 <!-- Add your privacy policy content here -->
                 <p>This is the privacy policy content. Please replace this with your actual privacy policy.</p>
             </div>
             <button 
                 on:click={closePrivacyPolicyModal}
-                class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-6 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-all duration-200"
+                class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-6 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-all duration-200 w-full sm:w-auto"
             >
                 Close
             </button>
         </div>
     </div>
 {/if}
-
 
 <style>
     #networkCanvas {

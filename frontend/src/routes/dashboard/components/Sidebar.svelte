@@ -85,76 +85,57 @@
 </script>
 
 <div class="sidebar flex flex-col h-full bg-gray-900 text-white">
-	<div class="profile flex items-center space-x-4 p-6 bg-gray-800 shadow-lg">
-		<div class="bg-gray-600 h-12 w-12 rounded-full"></div>
-		{#if isEditing}
-			<input
-				class="text-lg font-semibold text-white bg-gray-800 focus:outline-none"
-				type="text"
-				bind:value={editableName}
-				on:blur={saveName}
-				on:keydown={(e) => {
-					if (e.key === 'Enter') saveName();
-				}}
-			/>
-		{:else}
-			<p
-				class="text-lg font-semibold text-white hover:underline cursor-pointer"
-				on:dblclick={editMode}
-			>
-				{$authStore?.currentUser?.displayName}
-			</p>
-		{/if}
-	</div>
-	<div class="chat-history flex-grow flex flex-col w-full bg-gray-800 p-4  overflow-y-auto">
-		<p class="font-bold  text-xl text-white mb-2">Chat History</p>
-		{#if true}
-			{#each threads.slice().reverse() as thread, index}
-				<ThreadListElement thread={thread} index={index}
-					on:deleteThread={(event) => { deleteThread(event.detail.thread_id, event.detail.thread_name) }}
-					on:loadMessages={(event) => { loadMessages(event.detail.thread_id, event.detail.thread_name); }} />
-			{/each}
-		{/if}
-	</div>
+    <div class="profile flex items-center space-x-4 p-3 sm:p-6 bg-gray-800 shadow-lg">
+        <div class="bg-gray-600 h-10 w-10 sm:h-12 sm:w-12 rounded-full"></div>
+        {#if isEditing}
+            <input
+                class="text-base sm:text-lg font-semibold text-white bg-gray-800 focus:outline-none max-w-[200px]"
+                type="text"
+                bind:value={editableName}
+                on:blur={saveName}
+                on:keydown={(e) => {
+                    if (e.key === 'Enter') saveName();
+                }}
+            />
+        {:else}
+            <p
+                class="text-base sm:text-lg font-semibold text-white hover:underline cursor-pointer truncate max-w-[200px]"
+                on:dblclick={editMode}
+            >
+                {$authStore?.currentUser?.displayName}
+            </p>
+        {/if}
+    </div>
+    <div class="chat-history flex-grow flex flex-col w-full bg-gray-800 p-2 sm:p-4 overflow-y-auto">
+        <p class="font-bold text-lg sm:text-xl text-white mb-2">Chat History</p>
+        {#if true}
+            {#each threads.slice().reverse() as thread, index}
+                <ThreadListElement thread={thread} index={index}
+                    on:deleteThread={(event) => { deleteThread(event.detail.thread_id, event.detail.thread_name) }}
+                    on:loadMessages={(event) => { loadMessages(event.detail.thread_id, event.detail.thread_name); }} />
+            {/each}
+        {/if}
+    </div>
 </div>
 
 <style>
-	.hover-underline:hover {
-		text-decoration: underline; /* Adds underline on hover */
-	}
+    .hover-underline:hover {
+        text-decoration: underline;
+    }
 
-	.blurred-border {
-		position: relative;
-		overflow: hidden; /* Ensures no overflow from the pseudo-element */
-	}
-	.blurred-border::before {
-		content: '';
-		position: absolute;
-		top: -10px; /* Adjust depending on the blur amount */
-		left: 0;
-		right: 0;
-		height: 10px; /* Height of the blur effect */
-		background: inherit; /* Inherits the background of the parent */
-		filter: blur(8px); /* Adjust the blur intensity as needed */
-		border-radius: 10px 10px 0 0; /* Rounded top corners */
-	}
-	.profile {
-		padding: 5px; /* Smaller padding on mobile */
-	}
-
-	.chat-history {
-		padding: 2px; /* Smaller padding on mobile */
-	}
-
-	@media (min-width: 768px) {
-		.profile,
-		.chat-history {
-			padding: 10px; /* Larger padding on desktops */
-		}
-	}
-
-
-	input {
-		max-width: 200px; /* Limit input size to avoid layout shift */
-	}
+    .blurred-border {
+        position: relative;
+        overflow: hidden;
+    }
+    .blurred-border::before {
+        content: '';
+        position: absolute;
+        top: -10px;
+        left: 0;
+        right: 0;
+        height: 10px;
+        background: inherit;
+        filter: blur(8px);
+        border-radius: 10px 10px 0 0;
+    }
 </style>
