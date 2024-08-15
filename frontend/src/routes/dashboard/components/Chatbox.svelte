@@ -299,7 +299,7 @@
 			}
 	}
 
-	let isMobileInputExpanded = false;
+	// let isMobileInputExpanded = false;
 </script>
 
 <div class="flex flex-col h-full w-full justify-between p-0 md:p-4">
