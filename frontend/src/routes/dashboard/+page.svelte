@@ -59,8 +59,11 @@
 		return `${date} ${time}`;
 	}
 	function isSafari() {
-		return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-	}
+    if (typeof window !== 'undefined' && typeof navigator !== 'undefined') {
+        return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    }
+    return false; // Default to false when running on the server
+}
 
 	const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
