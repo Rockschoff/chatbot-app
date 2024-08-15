@@ -36,7 +36,7 @@
 		<strong class="text-gray-800">Document Comparision and Updates</strong>: The tool can review compliance documents and compare them with the most recent FDA standards.<br />
 		<strong class="text-gray-800">Information Retrieval</strong>: If you need specific information from a large document, the tool can quickly search and find relevant sections.<br />
 		<strong class="text-gray-800">Drafting Assistance</strong>: The tool can assist in drafting compliance documents or email. It can also help you generate new product labels.<br />
-		<strong class="text-gray-800">Translation into 20 languages</strong>: Tnteraction within this tool can be done in 20 main languages.<br />
+		<strong class="text-gray-800">Translation into 20 languages</strong>: Interaction within this tool can be done in 20 main languages.<br />
 		<br />
 		To get started, you can ask the tool a specific question, and the tool will use the FDA's compliance framework to provide accurate and relevant answers. If your question falls outside the scope of the documents, it will let you know.<br />
 		<br />
