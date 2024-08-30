@@ -85,7 +85,9 @@ export async function GetToolResponse(tools_calls : any[]){
 
 async function Search_CFR_Title_21(search_terms:string):Promise<string>{
     // const url = "https://www.ecfr.gov/api/search/v1/results?query=eggs%20and%20milk%20and%20lactic%20acid&per_page=5&page=1&order=relevance&paginate_by=results";
-    const url = "/api/api/search/v1/results?query=eggs%20and%20milk%20and%20lactic%20acid&per_page=25&page=1&order=relevance&paginate_by=results";
+    // const url = "/api/api/search/v1/results?query=eggs%20and%20milk%20and%20lactic%20acid&per_page=25&page=1&order=relevance&paginate_by=results";
+    const encodedSearchTerms = encodeURIComponent(search_terms);
+    const url = `/api/api/search/v1/results?query=${encodedSearchTerms}&per_page=25&page=1&order=relevance&paginate_by=results`;
     const options = {
         method: 'GET',
         headers: {
