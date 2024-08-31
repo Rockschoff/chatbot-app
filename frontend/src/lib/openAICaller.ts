@@ -105,7 +105,7 @@ async function Search_CFR_Title_21(search_terms:string):Promise<string>{
         .then(async (data) => {
             console.log(data);
             const c = data.results.map((ele : any)=>ele.hierarchy)
-            const hierarchyText : string[] = data.results.map((ele : any)=>ele.full_text_excerpt)//await getTextFromCFR(c);
+            const hierarchyText : string[] = data.results.map((ele : any)=>ele.full_text_excerpt + JSON.stringify(ele.hierarchy_headings))//await getTextFromCFR(c);
             console.log(hierarchyText.map((ele)=>ele.length))
             return hierarchyText.join("\n")
             
