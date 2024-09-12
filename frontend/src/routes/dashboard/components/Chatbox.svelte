@@ -144,7 +144,7 @@
 			const stream = await openai.beta.threads.runs.create(threadId, {
 				assistant_id: import.meta.env.VITE_ASSISTANTID, 
 				stream: true,
-				tool_choice: {"type": "file_search"},
+				tool_choice: "auto",
 				additional_instructions:"You want to gather as much information as you can. It is mandatory for you to do both, search the CFR and Search the files that are uploaded"
 			});
 			
