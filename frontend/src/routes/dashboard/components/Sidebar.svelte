@@ -84,12 +84,12 @@
 	}
 </script>
 
-<div class="sidebar flex flex-col h-full bg-gray-900 text-white">
-    <div class="profile flex items-center space-x-4 p-3 sm:p-6 bg-gray-800 shadow-lg">
+<div class="sidebar flex flex-col h-full text-white">
+    <div class="profile flex items-center space-x-4 p-3 sm:p-6 ">
         <div class="bg-gray-600 h-10 w-10 sm:h-12 sm:w-12 rounded-full"></div>
         {#if isEditing}
             <input
-                class="text-base sm:text-lg font-semibold text-white bg-gray-800 focus:outline-none max-w-[200px]"
+                class="text-base sm:text-lg font-semibold text-white  focus:outline-none max-w-[200px]"
                 type="text"
                 bind:value={editableName}
                 on:blur={saveName}
@@ -106,7 +106,7 @@
             </p>
         {/if}
     </div>
-    <div class="chat-history flex-grow flex flex-col w-full bg-gray-800 p-2 sm:p-4 overflow-y-auto">
+    <div class="chat-history flex-grow flex flex-col w-full  p-2 sm:p-4 overflow-y-auto">
         <p class="font-bold text-lg sm:text-xl text-white mb-2">Chat History</p>
         {#if true}
             {#each threads.slice().reverse() as thread, index (thread.thread_id)}
@@ -138,4 +138,8 @@
         filter: blur(8px);
         border-radius: 10px 10px 0 0;
     }
+
+	.bg-sidebar-color{
+		background-color: #374151;
+	}
 </style>

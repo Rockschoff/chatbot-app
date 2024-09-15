@@ -110,7 +110,7 @@
     <img class="logo w-30 h-auto mb-2 sm:mb-0" src="./logo.png" alt="company logo" />
     <h1 class="heading-font text-center text-xl sm:text-2xl md:text-3xl font-bold max-w-full">IN-Q knowledge center</h1>
     <div id = "Read Introduction" class="relative mt-2 sm:mt-0" on:click={toggleToolTip} title="Introduction">
-      <FontAwesomeIcon icon={faInfoCircle} class="info-icon text-2xl" />
+      <!-- <FontAwesomeIcon icon={faInfoCircle} class="info-icon text-2xl" /> -->
     </div>
   </div>
   {#if tooltipVisible}

@@ -12,6 +12,7 @@
 	import getFileText from './fileReader';
 	import getResponse, {GetToolResponse , getThreadName} from "../../../lib/openAICaller"
 	import { faL, faScrollTorah } from '@fortawesome/free-solid-svg-icons';
+	import {customSearch} from "../../../lib/googleSearch/searchAPI"
 
 	const dispatch = createEventDispatcher();
 
@@ -48,7 +49,7 @@
 		apiKey: import.meta.env.VITE_OPENAI_APIKEY,
 		dangerouslyAllowBrowser: true
 	});
-	async function handleEnterPress(event) {
+	async function handleEnterPress(event:any) {
 		if (event.key === 'Enter') sendMessage();
 	}
 	function isSafari() {
@@ -131,18 +132,25 @@
 	async function sendToOpenAI(userInput: string) {
 		if (!threadId) return;
 
+		console.log("TRYING THE GOOGLE SEARCH")
+		const search_results : { title: string; link: string; snippet: string; site_content: string }[]  = await customSearch(messageInput)
+		console.log(search_results)
+		console.log("FINISHED WITH THE GOOGLE SEARCH INPUT  " )
 		const content = file_text
-			? `Uploaded File Text: ${file_text}\n\nUser Input: ${userInput}`
-			: userInput;
-
-		console.log('content : ', content);
+			? `Uploaded File Text: ${file_text}\n\nRelevant pages from fda.gov : ${JSON.stringify(search_results)}\n\nUser Input: ${userInput}`
+			: `Relevant pages from fda.gov : ${JSON.stringify(search_results)}\n\nUser Input: ${userInput}`;
+		
+		console.log('content : ', content.length );
+		
 		await openai.beta.threads.messages.create(threadId, { role: 'user', content });
+		
+			
 		console.log("message added to thread")
 		try{
 
 			
 			const stream = await openai.beta.threads.runs.create(threadId, {
-				assistant_id: import.meta.env.VITE_ASSISTANTID, 
+				assistant_id: import.meta.env.VITE_ASSITANTID_GOOGLE_SEARCH, 
 				stream: true,
 				tool_choice: "auto",
 				additional_instructions:"You want to gather as much information as you can. It is mandatory for you to do both, search the CFR and Search the files that are uploaded"

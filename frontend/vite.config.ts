@@ -13,6 +13,11 @@ export default defineConfig({
 				changeOrigin: true,
 				rewrite: (path) => path.replace(/^\/api/, '')
 			},
+			"/fda-proxy": {
+				target: 'https://www.fda.gov',
+				changeOrigin: true,
+				rewrite: (path) => path.replace(/^\/fda-proxy/, '')
+			  },
 			// "/local-api" : {
 			// 	target : 'http://localhost:3000',
 			// 	changeOrigin: true,

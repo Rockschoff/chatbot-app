@@ -309,7 +309,7 @@
 	}
 </script>
 
-<div class="main-container bg-gray-200">
+<div class="main-container">
 	<div class="mobile-header bg-gray-700 flex justify-between items-center p-3 md:hidden mb-0">
         <div class="flex items-center space-x-4">
             <svg id="menu-toggle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="w-6 h-6 fill-gray-500" on:click={() => {showSidebar = !showSidebar}}>
@@ -327,7 +327,7 @@
         </div>
 		<!-- <div class="sidebar {showSidebar?"show":"hidden"}"><Sidebar on:newChat={handleNewChat} {threads} {user_id} {user_entry} {isGenerating} /></div> -->
     </div>
-	<div class="sidemenu bg-gray-700 h-full w-20 md:flex flex-col justify-between items-center p-5 hidden">
+	<div class="sidemenu bg-sidebar rounded-br-xl h-full w-20 md:flex flex-col justify-between items-center p-5 hidden">
 		<div class="flex flex-col items-center space-y-4">
 			<div class="icon-container flex flex-col items-center" data-info="Profile">
 				<svg id='profile' xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="w-10 h-10 fill-gray-500 hover:fill-blue-400" on:click={()=>{isGenerating? null :goto("/dashboard/profile")}}>
@@ -356,7 +356,7 @@
 			<span class="icon-label text-gray-500 text-xs">Logout</span>
 		</div>
 	  </div>
-	<div class="sidebar {showSidebar?"show":"hidden"} bg-gray-800"><Sidebar on:newChat={handleNewChat} {threads} {user_id} {user_entry} {isGenerating} /></div>
+	<div class="sidebar {showSidebar?"show":"hidden"} bg-sidebar"><Sidebar on:newChat={handleNewChat} {threads} {user_id} {user_entry} {isGenerating} /></div>
 	<div class="chat-window w-full">
 		<Chatbox on:newMessage={handleNewMessage} {threadId} {user_id} {messageContentList} 
 		on:generationStart={generationStart} on:generationStop={generationStop}  />

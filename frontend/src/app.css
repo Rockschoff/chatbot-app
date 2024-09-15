@@ -9,6 +9,14 @@
     font-style: normal;
 }
 
+.bg-sidebar{
+    background-color: #374151;
+}
+
+.bg-innovaq{
+    background-color: #FDF6ED;
+}
+
 .heading-font {
     font-family: 'pirulen', sans-serif;
 }
