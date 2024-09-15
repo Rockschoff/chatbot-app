@@ -13,7 +13,7 @@ const openai_api_key = process.env.OPENAI_APIKEY
 app.use(bodyParser.json());
 
 const corsOptions = {
-  origin: ['http://18.191.242.226', 'http://localhost:5173' , 'https://inq-center.innovaqual.com' , "http://localhost:3000"],
+  origin: ['http://18.191.242.226', 'http://localhost:5173' , 'https://inq-center.innovaqual.com' , "http://localhost:3000", "https://testbot.innovaqual.com"],
   optionsSuccessStatus: 200
 };
 
