@@ -10,7 +10,7 @@
 	// import mammoth from 'mammoth';
 	// import JSZip from 'jszip';
 	import getFileText from './fileReader';
-	import getResponse, {GetToolResponse , getThreadName} from "../../../lib/openAICaller"
+	import {GetToolResponse , getThreadName} from "../../../lib/openAICaller"
 	import { faL, faScrollTorah } from '@fortawesome/free-solid-svg-icons';
 	import {customSearch} from "../../../lib/googleSearch/searchAPI"
 
@@ -132,13 +132,13 @@
 	async function sendToOpenAI(userInput: string) {
 		if (!threadId) return;
 
-		console.log("TRYING THE GOOGLE SEARCH")
-		const search_results : { title: string; link: string; snippet: string; site_content: string }[]  = await customSearch(messageInput)
-		console.log(search_results)
-		console.log("FINISHED WITH THE GOOGLE SEARCH INPUT  " )
+		// console.log("TRYING THE GOOGLE SEARCH")
+		// const search_results : { title: string; link: string; snippet: string; site_content: string }[]  = await customSearch(messageInput)
+		// console.log(search_results)
+		// console.log("FINISHED WITH THE GOOGLE SEARCH INPUT  " )
 		const content = file_text
-			? `Uploaded File Text: ${file_text}\n\nRelevant pages from fda.gov : ${JSON.stringify(search_results)}\n\nUser Input: ${userInput}`
-			: `Relevant pages from fda.gov : ${JSON.stringify(search_results)}\n\nUser Input: ${userInput}`;
+			? `Uploaded File Text: ${file_text}\n\nUser Input: ${userInput}`
+			: `User Input: ${userInput}`;
 		
 		console.log('content : ', content.length );
 		

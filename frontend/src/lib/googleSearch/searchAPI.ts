@@ -101,21 +101,20 @@ export async function customSearch(query: string, num_results:number=10): Promis
             site_content: siteContent,
           });
         }
-        const MAX_LENGTH = 210000
+        const MAX_LENGTH = 110000
         while(JSON.stringify(ans).length > MAX_LENGTH){
             console.log("#####TRIMMING " , JSON.stringify(ans).length)
             let excess = JSON.stringify(ans).length - MAX_LENGTH
-            let highest_index_with_site_content = ans.length -1
-            for(var i = ans.length -1 ; i >= 0 ; i--){
-                if (ans[i].site_content.length > 0){
-                    highest_index_with_site_content=i
-                    break
+            let max_site_content_index = 0
+            for(var i = 0 ; i < ans.length ; i++){
+                if(ans[i].site_content.length > ans[max_site_content_index].site_content.length){
+                    max_site_content_index=i
                 }
             }
-            if(ans[highest_index_with_site_content].site_content.length < excess) {
-                ans[highest_index_with_site_content].site_content=""
+            if(ans[max_site_content_index].site_content.length < excess) {
+                ans[max_site_content_index].site_content=""
             }else{
-                ans[highest_index_with_site_content].site_content=ans[highest_index_with_site_content].site_content.substring(0, excess)
+                ans[max_site_content_index].site_content=ans[max_site_content_index].site_content.substring(0, excess)
             }
         }
         

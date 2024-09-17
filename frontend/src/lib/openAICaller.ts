@@ -1,5 +1,6 @@
 import {OpenAI} from "openai"
 import {tools , botDescription} from "./openAITool"
+import { customSearch } from "./googleSearch/searchAPI";
 
 const openai = new OpenAI({
     apiKey: import.meta.env.VITE_OPENAI_APIKEY,
@@ -7,68 +8,78 @@ const openai = new OpenAI({
 });
 
 
-export default async function getResponse(thread :  OpenAI.ChatCompletionMessageParam[]) : Promise<string> {
-    try{
-        const reponse : OpenAI.ChatCompletion = await openai.chat.completions.create({
-            model : "gpt-4o-2024-08-06",
-            messages : [{role : "system" , content : botDescription} , ...thread],
-            tools: tools,
-            tool_choice:"auto"
-        })
-        return reponse.choices[0].message.content ? reponse.choices[0].message.content : await getReponseFromFunctionCall(reponse.choices[0].message , thread)
-    }catch(err){
-        console.error('Error occured in reaching openai', err)
-        return "Error Occured in reaching openai"
-    }
-}
+// export default async function getResponse(thread :  OpenAI.ChatCompletionMessageParam[]) : Promise<string> {
+//     try{
+//         const reponse : OpenAI.ChatCompletion = await openai.chat.completions.create({
+//             model : "gpt-4o-2024-08-06",
+//             messages : [{role : "system" , content : botDescription} , ...thread],
+//             tools: tools,
+//             tool_choice:"auto"
+//         })
+//         return reponse.choices[0].message.content ? reponse.choices[0].message.content : await getReponseFromFunctionCall(reponse.choices[0].message , thread)
+//     }catch(err){
+//         console.error('Error occured in reaching openai', err)
+//         return "Error Occured in reaching openai"
+//     }
+// }
 
-async function getReponseFromFunctionCall(message : OpenAI.Chat.Completions.ChatCompletionMessage , thread :  OpenAI.ChatCompletionMessageParam[]) : Promise<string>{
-    if (message.tool_calls){
-        console.log(message.tool_calls)
+// async function getReponseFromFunctionCall(message : OpenAI.Chat.Completions.ChatCompletionMessage , thread :  OpenAI.ChatCompletionMessageParam[]) : Promise<string>{
+//     if (message.tool_calls){
+//         console.log(message.tool_calls)
 
-        let apis : {content : Promise<string> , tool_call_id : string , role : string}[] = []
-        message.tool_calls.map((call : any)=>{
-            let terms = JSON.parse(call.function.arguments)
-            let text = Search_CFR_Title_21(terms.search_terms)
-            apis = [...apis , {content : text , tool_call_id:call.id , role:"tool"}]
-        })
+//         let apis : {content : Promise<string> , tool_call_id : string , role : string}[] = []
+//         message.tool_calls.map((call : any)=>{
+//             let terms = JSON.parse(call.function.arguments)
+//             let text = Search_CFR_Title_21(terms.search_terms)
+//             apis = [...apis , {content : text , tool_call_id:call.id , role:"tool"}]
+//         })
         
-        let res :  OpenAI.Chat.Completions.ChatCompletionMessage[] = await Promise.all(apis.map(async (ele)=>{
-            return {
-                content : await ele.content,
-                role : ele.role,
-                tool_call_id :ele.tool_call_id,
-            }
-        }))
+//         let res :  OpenAI.Chat.Completions.ChatCompletionMessage[] = await Promise.all(apis.map(async (ele)=>{
+//             return {
+//                 content : await ele.content,
+//                 role : ele.role,
+//                 tool_call_id :ele.tool_call_id,
+//             }
+//         }))
         
-        // const terms = JSON.parse(message.tool_calls[0].function.arguments)
+//         // const terms = JSON.parse(message.tool_calls[0].function.arguments)
         
-        // const relevantThings  = await Search_CFR_Title_21(terms.search_terms)
+//         // const relevantThings  = await Search_CFR_Title_21(terms.search_terms)
 
-        // const toolMessage : OpenAI.Chat.Completions.ChatCompletionMessage = {role : "tool" , content : relevantThings, tool_call_id:message.tool_calls[0].id }
+//         // const toolMessage : OpenAI.Chat.Completions.ChatCompletionMessage = {role : "tool" , content : relevantThings, tool_call_id:message.tool_calls[0].id }
 
-        console.log("Making the call to openai second time")
+//         console.log("Making the call to openai second time")
 
-        try{
-            const reponse : OpenAI.ChatCompletion = await openai.chat.completions.create({
-                model : "gpt-4o-2024-08-06",
-                messages : [{role : "system" , content : botDescription} , ...thread , message , ...res]
-            })
+//         try{
+//             const reponse : OpenAI.ChatCompletion = await openai.chat.completions.create({
+//                 model : "gpt-4o-2024-08-06",
+//                 messages : [{role : "system" , content : botDescription} , ...thread , message , ...res]
+//             })
 
-            return reponse.choices[0].message.content? reponse.choices[0].message.content:"--"
-        }catch(err){
-            console.log("Error occures in the second call to OpenAI" , err)
-            return ""
-        }
-    }
-    return "Error running th tool on openAI"
-}
+//             return reponse.choices[0].message.content? reponse.choices[0].message.content:"--"
+//         }catch(err){
+//             console.log("Error occures in the second call to OpenAI" , err)
+//             return ""
+//         }
+//     }
+//     return "Error running th tool on openAI"
+// }
 
 export async function GetToolResponse(tools_calls : any[]){
-    const promiseContent = tools_calls.map((ele)=>{
-        const terms = JSON.parse(ele.function.arguments)
-        const text = Search_CFR_Title_21(terms.search_terms)
-        return {tool_call_id : ele.id , role : "tool" , content: text}
+    const promiseContent : {tool_call_id : string , role : string , content: Promise<string>|string}[] = tools_calls.map((ele)=>{
+        console.log(`Calling the tool : ${ele.function.name}`)
+        if(ele.function.name=="Search_CFR_Title_21"){
+            const terms = JSON.parse(ele.function.arguments)
+            const text = Search_CFR_Title_21(terms.search_terms)
+            return {tool_call_id : ele.id , role : "tool" , content: text}
+        }else if(ele.function.name=="Search_FDA_Website"){
+            const terms = JSON.parse(ele.function.arguments)
+            const text = Search_FDA_Website(terms.search_terms)
+            return {tool_call_id : ele.id , role : "tool" , content: text}
+        }else {
+            return {tool_call_id : ele.id , role : "tool" , content: `Unable to Process Tool Request ${ele.function.name}`}
+        }
+        
     })
 
     const content = await Promise.all(promiseContent.map(async (ele)=>{
@@ -78,10 +89,17 @@ export async function GetToolResponse(tools_calls : any[]){
             output : await ele.content
         }
     }))
-
+    console.log( "TOOL CALLS : ", content)
     return content
 }
 
+async function Search_FDA_Website(search_terms:string):Promise<string>{
+    console.log("Searching FDA website : " , search_terms)
+    const search_results : { title: string; link: string; snippet: string; site_content: string }[] = await customSearch(search_terms ,5)
+    console.log("FDA RESULTS : " , search_terms , search_results)
+    return JSON.stringify(search_results)
+
+}
 
 async function Search_CFR_Title_21(search_terms:string):Promise<string>{
     // const url = "https://www.ecfr.gov/api/search/v1/results?query=eggs%20and%20milk%20and%20lactic%20acid&per_page=5&page=1&order=relevance&paginate_by=results";
