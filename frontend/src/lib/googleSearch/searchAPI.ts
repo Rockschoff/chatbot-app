@@ -78,6 +78,8 @@ async function fetchSiteContent(url: string): Promise<string> {
 //     return [];
 //   }
 // }
+
+
 export async function customSearch(query: string, num_results:number=10): Promise<{ title: string; link: string; snippet: string; site_content: string }[]> {
     const apiKey: string = import.meta.env.VITE_GOOGLE_SEARCH_KEY;
     const cx: string = import.meta.env.VITE_GOOGLE_SEARCH_ENGINE_ID;
@@ -128,3 +130,7 @@ export async function customSearch(query: string, num_results:number=10): Promis
       return [];
     }
   }
+
+// export async function customSearch(query: string, num_results:number=10): Promise<{ title: string; link: string; snippet: string; site_content: string }[]>{
+//     return []
+// }

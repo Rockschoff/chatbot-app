@@ -279,13 +279,13 @@
                 </label>
             </div>
             <div class="flex flex-col sm:flex-row items-center justify-between pt-4">
-                <!-- <button
+                <button
                     class="text-pink-500 hover:text-pink-600 text-sm font-semibold focus:outline-none transition-colors duration-200 mb-4 sm:mb-0"
                     type="button"
                     on:click={toggleAccountCreation}
                 >
                     {isCreatingAccount ? 'Already have an account?' : 'Create an account'}
-                </button> -->
+                </button>
                 <button
                     class="bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 hover:from-pink-500 hover:to-pink-700 text-white font-bold py-2 px-6 rounded-full shadow-md transform hover:scale-105 transition-all duration-300 w-full sm:w-auto"
                     type="submit"
