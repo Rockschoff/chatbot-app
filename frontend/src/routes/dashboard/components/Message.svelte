@@ -231,7 +231,7 @@
                 {/if}
             </div>
 
-            {#if citationList.length > 0}
+            {#if false && citationList.length > 0}
                 <div class="mt-3 pt-3 border-t border-gray-200">
                     <h5 class="text-xs font-semibold text-gray-600 mb-2 flex items-center cursor-pointer" on:click={() => showCitations = !showCitations}>
                         Citations:

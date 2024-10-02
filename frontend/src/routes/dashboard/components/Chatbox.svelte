@@ -183,7 +183,7 @@
 								
 					}else if(event.data.delta.content[0].text.annotations?.length > 0){
 						// console.log(event.data.delta.content[0].text)
-						messageContentList[messageContentList.length - 1].messageText += ` [\[ref\]](./dashboard/${event.data.delta.content[0].text.annotations[0].file_citation.file_id}) `
+						messageContentList[messageContentList.length - 1].messageText += ""//` [\[ref\]](./dashboard/${event.data.delta.content[0].text.annotations[0].file_citation.file_id}) `
 						event.data.delta.content[0].text.annotations.forEach((ele:any) => {
 							if (ele?.file_citation) {
 								const ref: citation = {
@@ -242,7 +242,7 @@
 						messageContentList[messageContentList.length - 1].messageText += event.data.delta.content[0].text.value;
 					}else if(event.data.delta.content[0].text.annotations?.length > 0){
 						// console.log("got annotations" , event.data.delta.content[0].text)
-						messageContentList[messageContentList.length - 1].messageText += ` [\[ref\]](./dashboard/${event.data.delta.content[0].text.annotations[0].file_citation.file_id}) `
+						messageContentList[messageContentList.length - 1].messageText += ""//` [](./dashboard/${event.data.delta.content[0].text.annotations[0].file_citation.file_id}) `
 						event.data.delta.content[0].text.annotations.forEach((ele) => {
 							if (ele?.file_citation) {
 								const ref: citation = {
